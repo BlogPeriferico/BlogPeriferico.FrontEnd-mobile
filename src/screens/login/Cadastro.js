@@ -1,63 +1,73 @@
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ImageBackground,
+  View, Text, TextInput, TouchableOpacity, ImageBackground, ActivityIndicator
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import CloseEye from "../../assets/svgs/Close_Eye.svg";
 import OpenEye from "../../assets/svgs/Open_Eye.svg";
-import api from "../../api/api";
-import { styles } from "../../styles/login/LoginStyles"; // reuso dos estilos
+import { styles } from "../../styles/login/LoginStyles";
 import Fundo from "../../assets/images/Fundo_login.png";
+
+import { cadastrarUsuario } from "../../services/usuario";
+import StatusModal from "../../components/ui/StatusModal";
+import { formatApiError } from "../../utils/formatApiError";
 
 export default function Cadastro({ navigation }) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [campoInvalido, setCampoInvalido] = useState({ nome: false, email: false, senha: false });
+  const [loading, setLoading] = useState(false);
+  const [modal, setModal] = useState({ visible: false, type: "info", title: "", message: "" });
 
-  const [campoInvalido, setCampoInvalido] = useState({
-    nome: false,
-    email: false,
-    senha: false,
-  });
-
-  const validarEmail = (e) => /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(e);
+  const validarEmail = (e) => /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/i.test(e?.trim());
+  const showError = (m, t="Erro no cadastro") => setModal({ visible: true, type: "error", title: t, message: m });
 
   const handleRegistrar = async () => {
-    if (!nome || !email || !senha) {
-      setCampoInvalido({
-        nome: !nome,
-        email: !email,
-        senha: !senha,
-      });
-      Alert.alert("Erro", "Preencha todos os campos!");
-      return;
-    }
-    if (!validarEmail(email)) {
-      setCampoInvalido((p) => ({ ...p, email: true }));
-      Alert.alert("Erro", "Digite um e-mail válido!");
+    if (loading) return;
+
+    const nomeTrim = nome.trim();
+    const emailTrim = email.trim();
+    const senhaTrim = senha;
+
+    const invalido = {
+      nome: !nomeTrim || nomeTrim.length < 3,
+      email: !validarEmail(emailTrim),
+      senha: !senhaTrim || senhaTrim.length < 6,
+    };
+    setCampoInvalido(invalido);
+
+    if (invalido.nome || invalido.email || invalido.senha) {
+      let msg = "Corrija os campos:\n";
+      if (invalido.nome) msg += "• Nome (mín. 3 caracteres)\n";
+      if (invalido.email) msg += "• E-mail válido\n";
+      if (invalido.senha) msg += "• Senha (mín. 6 caracteres)";
+      showError(msg, "Campos inválidos");
       return;
     }
 
     try {
-      // 🔧 Ajuste o endpoint conforme seu back-end
-      await api.post("/usuario/cadastro", { nome, email, senha });
-      Alert.alert("Cadastro", "Conta criada com sucesso!");
-      navigation.navigate("Noticias");
+      setLoading(true);
+      await cadastrarUsuario({ nome: nomeTrim, email: emailTrim, senha: senhaTrim });
+      setLoading(false);
+      setModal({
+        visible: true,
+        type: "success",
+        title: "Conta criada",
+        message: "Sua conta foi criada com sucesso!",
+      });
     } catch (error) {
-      Alert.alert("Erro", error.response?.data || "Erro no cadastro");
+      setLoading(false);
+      const msg = formatApiError(error, "cadastro");
+      showError(msg);
     }
   };
 
   return (
     <ImageBackground source={Fundo} style={styles.background} resizeMode="cover">
-      {/* TOPO (fora do card) */}
+      {/* TOPO */}
       <View style={styles.headerTop}>
         <Text style={styles.titulo}>Registre-se</Text>
         <Text style={styles.subtitulo}>Crie uma conta para continuar!</Text>
@@ -66,9 +76,10 @@ export default function Cadastro({ navigation }) {
       {/* CARD */}
       <View style={styles.cardWrapper}>
         <View style={styles.card}>
+          {/* Nome */}
           <TextInput
             style={[styles.input, campoInvalido.nome && styles.inputErro]}
-            placeholder="Pedro Pimentinha"
+            placeholder="Nome completo"
             placeholderTextColor="#888"
             value={nome}
             underlineColorAndroid="transparent"
@@ -76,11 +87,14 @@ export default function Cadastro({ navigation }) {
               setNome(t);
               setCampoInvalido((p) => ({ ...p, nome: false }));
             }}
+            autoCapitalize="words"
+            returnKeyType="next"
           />
 
+          {/* Email */}
           <TextInput
             style={[styles.input, campoInvalido.email && styles.inputErro]}
-            placeholder="Geladeirapimentinha@gmail.com"
+            placeholder="email@exemplo.com"
             placeholderTextColor="#888"
             value={email}
             underlineColorAndroid="transparent"
@@ -90,8 +104,10 @@ export default function Cadastro({ navigation }) {
             }}
             keyboardType="email-address"
             autoCapitalize="none"
+            returnKeyType="next"
           />
 
+          {/* Senha */}
           <View style={[styles.senhaContainer, campoInvalido.senha && styles.inputErro]}>
             <TextInput
               style={styles.inputSenha}
@@ -104,25 +120,35 @@ export default function Cadastro({ navigation }) {
                 setSenha(t);
                 setCampoInvalido((p) => ({ ...p, senha: false }));
               }}
+              autoCapitalize="none"
+              returnKeyType="done"
+              onSubmitEditing={handleRegistrar}
             />
-            <TouchableOpacity onPress={() => setMostrarSenha((v) => !v)}>
+            <TouchableOpacity
+              onPress={() => setMostrarSenha((v) => !v)}
+              accessibilityLabel={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+            >
               {mostrarSenha ? <OpenEye width={24} height={24} /> : <CloseEye width={24} height={24} />}
             </TouchableOpacity>
           </View>
 
-          {/* Botão principal */}
-          <TouchableOpacity activeOpacity={0.9} onPress={handleRegistrar}>
+          {/* Ação */}
+          <TouchableOpacity activeOpacity={0.9} onPress={handleRegistrar} disabled={loading}>
             <LinearGradient
               colors={["#9B9B9B", "#6F6F6F"]}
               start={{ x: 0.5, y: 0 }}
               end={{ x: 0.5, y: 1 }}
-              style={styles.botaoGradiente}
+              style={[styles.botaoGradiente, loading && { opacity: 0.7 }]}
             >
-              <Text style={styles.botaoTexto}>Registre-se</Text>
+              {loading ? (
+                <ActivityIndicator size="small" />
+              ) : (
+                <Text style={styles.botaoTexto}>Registre-se</Text>
+              )}
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* Divider OU com linhas */}
+          {/* OU */}
           <View style={styles.dividerRow}>
             <View style={styles.dividerLine} />
             <Text style={styles.dividerText}>Ou</Text>
@@ -132,12 +158,13 @@ export default function Cadastro({ navigation }) {
           {/* Visitante */}
           <TouchableOpacity
             style={styles.visitorButton}
-            onPress={() => navigation.navigate("Noticias")}
+            onPress={() => navigation.replace("Noticias")}
+            disabled={loading}
           >
             <Text style={styles.visitorText}>Entrar como visitante</Text>
           </TouchableOpacity>
 
-          {/* Rodapé dentro do card */}
+          {/* Ir para login */}
           <View style={styles.registroContainer}>
             <Text style={styles.registroTexto}>Já tem uma conta? </Text>
             <TouchableOpacity onPress={() => navigation.navigate("Login")}>
@@ -146,6 +173,22 @@ export default function Cadastro({ navigation }) {
           </View>
         </View>
       </View>
+
+      {/* Modal */}
+      <StatusModal
+        visible={modal.visible}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        primaryText={modal.type === "success" ? "Ir para login" : "OK"}
+        onPrimary={() => {
+          setModal((m) => ({ ...m, visible: false }));
+          if (modal.type === "success") {
+            navigation.replace("Login", { emailPrefill: email });
+          }
+        }}
+        onRequestClose={() => setModal((m) => ({ ...m, visible: false }))}
+      />
     </ImageBackground>
   );
 }
