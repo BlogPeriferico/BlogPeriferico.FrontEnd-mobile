@@ -1,133 +1,179 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import CloseEye from '../../assets/svgs/Close_Eye.svg';
-import OpenEye from '../../assets/svgs/Open_Eye.svg';
-import GoogleIcon from '../../assets/svgs/google_icon.svg';
-import api from '../../api/api';
-import { styles } from '../../styles/login/LoginStyles';
+import React, { useEffect, useState } from "react";
+import {
+  View, Text, TextInput, TouchableOpacity, ImageBackground,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function Login({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
+import CloseEye from "../../assets/svgs/Close_Eye.svg";
+import OpenEye from "../../assets/svgs/Open_Eye.svg";
+import { styles } from "../../styles/login/LoginStyles";
+import Fundo from "../../assets/images/Fundo_login.png";
+
+import { login } from "../../services/auth";
+import StatusModal from "../../components/ui/StatusModal";
+import { formatApiError } from "../../utils/formatApiError";
+
+const STORAGE_KEYS = { LEMBRAR: "@login/lembrar", EMAIL: "@login/email" };
+
+export default function Login({ navigation, route }) {
+  const [email, setEmail] = useState(route?.params?.emailPrefill ?? "");
+  const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [lembrar, setLembrar] = useState(false);
   const [campoInvalido, setCampoInvalido] = useState({ email: false, senha: false });
+  const [modal, setModal] = useState({ visible: false, type: "info", title: "", message: "" });
 
-  const alternarVisibilidadeSenha = () => {
-    setMostrarSenha(!mostrarSenha);
-  };
+  const alternarVisibilidadeSenha = () => setMostrarSenha((v) => !v);
+  const validarEmail = (e) => /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(e);
 
-  const validarEmail = (email) => {
-    const regex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
-    return regex.test(email);
-  };
+  const showError = (message, title = "Não foi possível entrar") =>
+    setModal({ visible: true, type: "error", title, message });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const savedLembrar = await AsyncStorage.getItem(STORAGE_KEYS.LEMBRAR);
+        const lembrarBool = savedLembrar === "true";
+        setLembrar(lembrarBool);
+        if (lembrarBool && !email) {
+          const savedEmail = await AsyncStorage.getItem(STORAGE_KEYS.EMAIL);
+          if (savedEmail) setEmail(savedEmail);
+        }
+      } catch {}
+    })();
+  }, []);
 
   const handleLogin = async () => {
-    const emailVazio = email.trim() === '';
-    const senhaVazia = senha.trim() === '';
-    const emailInvalido = !validarEmail(email);
-
-    if (emailVazio || senhaVazia) {
-      setCampoInvalido({ email: emailVazio, senha: senhaVazia });
-      Alert.alert('Erro', 'Preencha todos os campos!');
+    if (!email || !senha) {
+      setCampoInvalido({ email: !email, senha: !senha });
+      showError("Preencha todos os campos!");
       return;
     }
-
-    if (emailInvalido) {
+    if (!validarEmail(email)) {
       setCampoInvalido({ email: true, senha: false });
-      Alert.alert('Erro', 'Digite um e-mail válido!');
+      showError("Digite um e-mail válido!");
       return;
     }
 
     try {
-      const response = await api.post('/usuario/login', { email, senha });
-      Alert.alert('Login', 'Sucesso!');
-      navigation.navigate('Noticias');
+      await login({ email, senha });
+
+      if (lembrar) {
+        await AsyncStorage.setItem(STORAGE_KEYS.LEMBRAR, "true");
+        await AsyncStorage.setItem(STORAGE_KEYS.EMAIL, email);
+      } else {
+        await AsyncStorage.removeItem(STORAGE_KEYS.LEMBRAR);
+        await AsyncStorage.removeItem(STORAGE_KEYS.EMAIL);
+      }
+
+      navigation.replace("Noticias");
     } catch (error) {
-      Alert.alert('Erro', error.response?.data || 'Erro no login');
+      const msg = formatApiError(error, "login");
+      showError(msg);
     }
   };
 
   return (
-    <LinearGradient colors={['#bccbed', '#50417A']} style={styles.container}>
-      <View style={styles.card}>
+    <ImageBackground source={Fundo} style={styles.background} resizeMode="cover">
+      {/* TOPO */}
+      <View style={styles.headerTop}>
         <Text style={styles.titulo}>Login</Text>
         <Text style={styles.subtitulo}>Entre com seu email e sua senha</Text>
+      </View>
 
-        <TextInput
-          style={[styles.input, campoInvalido.email && styles.inputErro]}
-          placeholder="Email"
-          value={email}
-          onChangeText={(text) => {
-            setEmail(text);
-            setCampoInvalido(prev => ({ ...prev, email: false }));
-          }}
-          placeholderTextColor="#888"
-          maxLength={100}
-          keyboardType="email-address"
-        />
-
-        <View style={[styles.senhaContainer, campoInvalido.senha && styles.inputErro]}>
+      {/* CARD */}
+      <View style={styles.cardWrapper}>
+        <View style={styles.card}>
+          {/* Email */}
           <TextInput
-            style={styles.inputSenha}
-            placeholder="Senha"
-            value={senha}
-            onChangeText={(text) => {
-              setSenha(text);
-              setCampoInvalido(prev => ({ ...prev, senha: false }));
-            }}
-            secureTextEntry={!mostrarSenha}
+            style={[styles.input, campoInvalido.email && styles.inputErro]}
+            placeholder="Email"
             placeholderTextColor="#888"
-            maxLength={100}
+            value={email}
+            underlineColorAndroid="transparent"
+            onChangeText={(t) => {
+              setEmail(t);
+              setCampoInvalido((p) => ({ ...p, email: false }));
+            }}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
-          <TouchableOpacity onPress={alternarVisibilidadeSenha}>
-            {mostrarSenha ? <OpenEye width={24} height={24} /> : <CloseEye width={24} height={24} />}
-          </TouchableOpacity>
-        </View>
 
-        <View style={styles.linhaLembrete}>
-          <View style={styles.checkboxContainer}>
-            <View style={styles.checkboxVazio} />
-            <Text style={styles.checkboxTexto}>Lembre me</Text>
+          {/* Senha */}
+          <View style={[styles.senhaContainer, campoInvalido.senha && styles.inputErro]}>
+            <TextInput
+              style={styles.inputSenha}
+              placeholder="Senha"
+              placeholderTextColor="#888"
+              secureTextEntry={!mostrarSenha}
+              value={senha}
+              underlineColorAndroid="transparent"
+              onChangeText={(t) => {
+                setSenha(t);
+                setCampoInvalido((p) => ({ ...p, senha: false }));
+              }}
+              autoCapitalize="none"
+              returnKeyType="done"
+              onSubmitEditing={handleLogin}
+            />
+            <TouchableOpacity onPress={alternarVisibilidadeSenha}>
+              {mostrarSenha ? <OpenEye width={24} height={24} /> : <CloseEye width={24} height={24} />}
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity>
-            <Text style={styles.link}>Esqueci minha senha</Text>
+
+          {/* Lembre-me / Esqueci */}
+          <View style={styles.linhaLembrete}>
+            <TouchableOpacity
+              style={styles.checkboxContainer}
+              onPress={() => setLembrar((v) => !v)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.checkboxBase, lembrar && styles.checkboxMarcado]}>
+                {lembrar && <Text style={styles.checkboxIcon}>✓</Text>}
+              </View>
+              <Text style={styles.checkboxTexto}>Lembre me</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => navigation.navigate("EsqueciSenhaEmail")}>
+              <Text style={styles.link}>Esqueci minha senha</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Ação */}
+          <TouchableOpacity activeOpacity={0.9} onPress={handleLogin}>
+            <LinearGradient
+              colors={["#9B9B9B", "#6F6F6F"]}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 1 }}
+              style={styles.botaoGradiente}
+            >
+              <Text style={styles.botaoTexto}>Login</Text>
+            </LinearGradient>
           </TouchableOpacity>
-        </View>
 
-        <TouchableOpacity style={styles.botao} onPress={handleLogin}>
-          <Text style={styles.botaoTexto}>Login</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('Noticias')}>
-          <Text style={styles.visitorButton}>Entrar como visitante</Text>
-        </TouchableOpacity>
-
-        <View style={styles.divisor}>
-          <View style={styles.linha} />
-          <Text style={styles.ou}>Ou login com</Text>
-          <View style={styles.linha} />
-        </View>
-
-        <TouchableOpacity
-  style={styles.googleBtn}
-  onPress={() => navigation.navigate('Noticias')}
->
-  <Text style={{ color: '#3366FF', fontWeight: 'bold', fontFamily: 'Rubik', fontSize: 15 }}>
-    Entrar como visitante
-  </Text>
-</TouchableOpacity>
-
-
-        <View style={styles.registroContainer}>
-          <Text style={styles.registroTexto}>Não tem uma conta ainda? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Cadastro')}>
-            <Text style={styles.linkRegistro}>Registre-se</Text>
-          </TouchableOpacity>
+          {/* Ir para cadastro */}
+          <View style={styles.registroContainer}>
+            <Text style={styles.registroTexto}>Não tem uma conta ainda? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate("Cadastro")}>
+              <Text style={styles.linkRegistro}>Registre-se</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
       <Text style={styles.footer}>Logue para continuar</Text>
-    </LinearGradient>
+
+      {/* Modal bonitinho */}
+      <StatusModal
+        visible={modal.visible}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        primaryText="OK"
+        onPrimary={() => setModal((m) => ({ ...m, visible: false }))}
+        onRequestClose={() => setModal((m) => ({ ...m, visible: false }))}
+      />
+    </ImageBackground>
   );
 }

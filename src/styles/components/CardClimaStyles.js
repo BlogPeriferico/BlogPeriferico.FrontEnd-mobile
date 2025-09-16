@@ -1,68 +1,88 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   card: {
-    height: 220,
-    borderRadius: 12,
-    overflow: 'hidden',
-    margin: 16,
-    position: 'relative',
+    height: 240, 
+    overflow: "hidden",
+    marginTop: 6,
+    position: "relative",
   },
   imagem: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
-  overlay: {
-    position: 'absolute',
-    top: 10,
-    left: 16,
+  dim: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.35)",
+  },
+
+  // topo
+  localTop: {
+    position: "absolute",
+    top: 8,
+    left: 10,
+    flexDirection: "row",
+    alignItems: "center",
   },
   localizacao: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 16,
-    marginBottom: 4,
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 14, 
+  },
+
+  // conteúdo central
+  centerContent: {
+    position: "absolute",
+    alignSelf: "center",
+    top: "40%", 
+    alignItems: "center",
   },
   icone: {
-    width: 60,
-    height: 60,
+    width: 40,
+    height: 40, 
+    marginBottom: 2,
   },
   temp: {
-    fontSize: 28,
-    color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 26, 
+    color: "#fff",
+    fontWeight: "700",
   },
-  info: {
-    color: '#eee',
+  weekday: {
+    color: "#EAF0F6",
     fontSize: 14,
+    marginTop: 2,
   },
+  date: {
+    color: "#EAF0F6",
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+
   loader: {
-    position: 'absolute',
-    alignSelf: 'center',
-    top: '45%',
+    position: "absolute",
+    alignSelf: "center",
+    top: "45%",
   },
   erro: {
-    color: 'red',
-    textAlign: 'center',
-    marginTop: 20,
+    position: "absolute",
+    alignSelf: "center",
+    top: "45%",
+    color: "red",
+    fontWeight: "600",
   },
-  anterior: {
-    position: 'absolute',
-    left: 8,
-    top: '45%',
-    padding: 10,
-    zIndex: 10,
+
+  // setas
+  navBtn: {
+    position: "absolute",
+    top: "45%",
+    width: 28,
+    height: 28,
+    color: "#fff",
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  proximo: {
-    position: 'absolute',
-    right: 8,
-    top: '45%',
-    padding: 10,
-    zIndex: 10,
-  },
-  seta: {
-    color: '#fff',
-    fontSize: 30,
-    fontWeight: 'bold',
-  },
+  esquerda: { left: 6 },
+  direita: { right: 6 },
 });
