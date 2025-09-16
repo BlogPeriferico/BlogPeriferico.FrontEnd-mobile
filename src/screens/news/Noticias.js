@@ -175,5 +175,6 @@ export default function Noticias() {
         )}
       </ScrollView>
     </View>
+    
   );
 }

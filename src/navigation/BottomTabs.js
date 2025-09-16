@@ -7,11 +7,13 @@ import NoticiasScreen from "../screens/news/Noticias.js";
 import DoacoesScreen from "../screens/doacoes/Doacoes.js";
 import AchadinhosScreen from "../screens/achadinhos/Achadinhos.js";
 import MaoAmigaScreen from "../screens/maoamiga/MaoAmiga.js";
+import LandingScreen from "../screens/sobrenos/sobrenos.js"
 
 import IconNews from "../assets/svgs/tab/Jornal.svg";
 import IconHandHeart from "../assets/svgs/tab/MaoCoracao.svg";
 import IconStore from "../assets/svgs/tab/Loja.svg";
 import IconMegaphone from "../assets/svgs/tab/Megafone.svg";
+import IconQuestion from "../assets/svgs/tab/interrogacao.svg"
 
 const Tab = createBottomTabNavigator();
 
@@ -112,6 +114,15 @@ export default function BottomTabs() {
           ),
         }}
       />
+      <Tab.Screen
+        name="LandingTab"
+        component={LandingScreen}
+        options={{
+        tabBarIcon: ({ focused }) => (
+      <IconQuestion width={28} height={28} color={focused ? ACTIVE : INACTIVE} />
+    ),
+  }}
+/>
     </Tab.Navigator>
   );
 }
