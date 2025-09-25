@@ -1,10 +1,11 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   View,
   Text,
   Image,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "../../components/Header";
@@ -29,7 +30,24 @@ export default function DetalheNoticia({ route, navigation }) {
   const noticia = route?.params?.noticia;
   const { colors } = useRegionTheme();
 
-  const dataStr = useMemo(() => formatDatePt(noticia?.dataIso), [noticia?.dataIso]);
+  const [autor, setAutor] = useState(null);
+  const [loadingAutor, setLoadingAutor] = useState(true);
+
+  // Buscar nome do autor usando o idUsuario
+  useEffect(() => {
+    if (noticia?.idUsuario) {
+      fetch(`http://localhost:8080/usuarios/listar/${noticia.idUsuario}`)
+        .then((res) => res.json())
+        .then((data) => setAutor(data.nome))
+        .catch(() => setAutor("Autor desconhecido"))
+        .finally(() => setLoadingAutor(false));
+    } else {
+      setAutor("Autor desconhecido");
+      setLoadingAutor(false);
+    }
+  }, [noticia?.idUsuario]);
+
+  const dataStr = useMemo(() => formatDatePt(noticia?.dataHoraCriacao), [noticia?.dataHoraCriacao]);
   const tituloTop = useMemo(
     () => (noticia?.titulo ? String(noticia.titulo).trim() : "Detalhe"),
     [noticia?.titulo]
@@ -66,7 +84,11 @@ export default function DetalheNoticia({ route, navigation }) {
 
       <ScrollView contentContainerStyle={s.scrollContent}>
         {noticia.imagem ? (
-          <Image source={{ uri: noticia.imagem }} style={s.cover} />
+          <Image
+            source={{ uri: noticia.imagem }}
+            style={[s.cover, { alignSelf: "center" }]}
+            resizeMode="contain"
+          />
         ) : null}
 
         <Text style={s.title}>{noticia.titulo}</Text>
@@ -75,27 +97,20 @@ export default function DetalheNoticia({ route, navigation }) {
         <View style={s.metaRow}>
           <View style={s.avatar} />
           <View style={{ flex: 1 }}>
-            <Text style={s.author}>{noticia.autorNome || "Autor"}</Text>
+            <Text style={s.author}>
+              {loadingAutor ? "Carregando autor..." : autor}
+            </Text>
             <View style={s.metaSubRow}>
               <Text style={s.metaText}>{dataStr}</Text>
               <View style={s.dot} />
-              <Text style={s.metaText}>{noticia.regiao || "Sudeste"}</Text>
+              <Text style={s.metaText}>{noticia.zona || "Sudeste"}</Text>
             </View>
           </View>
         </View>
 
         <View style={s.separator} />
 
-        <View style={s.commentsHeader}>
-          <Text style={s.commentsCount}>
-            {Number.isFinite(noticia.comments)
-              ? `${noticia.comments} comentarios`
-              : "4 comentarios"}
-          </Text>
-          <Ionicons name="chevron-down" size={18} color="#6B7280" />
-        </View>
-
-        <Text style={s.body}>{noticia.subtitulo}</Text>
+        <Text style={s.body}>{noticia.texto}</Text>
       </ScrollView>
     </View>
   );

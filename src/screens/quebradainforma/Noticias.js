@@ -33,7 +33,7 @@ function formatDatePt(dateIso) {
 }
 
 export default function Noticias({ navigation }) {
-  const { colors } = useRegionTheme();
+  const { regiao, colors } = useRegionTheme();
 
   const [listaCompleta, setListaCompleta] = useState([]);
   const [pageState, setPageState] = useState({ page: 1, pageSize: 5, hasMore: true });
@@ -44,11 +44,17 @@ export default function Noticias({ navigation }) {
 
   const carregar = useCallback(async () => {
     const data = await getTodasNoticias(); // já ordena desc no service
-    setListaCompleta(data);
-    const pg = paginaNoticias(data, { page: 1, pageSize: 5 });
+
+    // Filtra só notícias da região
+    const filtradas = data.filter(
+      (n) => n.regiao?.toLowerCase() === regiao?.toLowerCase()
+    );
+
+    setListaCompleta(filtradas);
+    const pg = paginaNoticias(filtradas, { page: 1, pageSize: 5 });
     setItens(pg.items);
     setPageState({ page: 1, pageSize: 5, hasMore: pg.hasMore });
-  }, []);
+  }, [regiao]);
 
   const load = useCallback(async () => {
     try {
@@ -61,7 +67,9 @@ export default function Noticias({ navigation }) {
     }
   }, [carregar]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const onRefresh = useCallback(async () => {
     try {
@@ -124,7 +132,7 @@ export default function Noticias({ navigation }) {
 
         {/* TÍTULO SESSÃO + BOTÃO ADICIONAR */}
         <View style={s.newsHeaderRow}>
-          <Text style={s.newsHeaderTitle}>Seleção de noticias</Text>
+          <Text style={s.newsHeaderTitle}>Seleção de notícias</Text>
           <TouchableOpacity
             onPress={goNovaNoticia}
             accessibilityLabel="Adicionar notícia"
@@ -143,8 +151,14 @@ export default function Noticias({ navigation }) {
           <>
             {/* CARD GRANDE (última) */}
             {ultima ? (
-              <TouchableOpacity activeOpacity={0.9} onPress={() => goDetalhe(ultima)} style={s.leadCard}>
-                {ultima.imagem ? <Image source={{ uri: ultima.imagem }} style={s.leadImage} /> : null}
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => goDetalhe(ultima)}
+                style={s.leadCard}
+              >
+                {ultima.imagem ? (
+                  <Image source={{ uri: ultima.imagem }} style={s.leadImage} />
+                ) : null}
                 <View style={s.leadBody}>
                   <Text style={s.leadTitle}>{ultima.titulo}</Text>
                   {!!ultima.subtitulo && (
@@ -196,7 +210,9 @@ export default function Noticias({ navigation }) {
                 activeOpacity={0.9}
                 style={[s.verMaisBtn, { backgroundColor: colors.primary }]}
               >
-                <Text style={s.verMaisLabel}>{loadingMore ? "Carregando..." : "VER MAIS"}</Text>
+                <Text style={s.verMaisLabel}>
+                  {loadingMore ? "Carregando..." : "VER MAIS"}
+                </Text>
               </TouchableOpacity>
             ) : null}
           </>

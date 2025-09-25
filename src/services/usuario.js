@@ -1,6 +1,18 @@
 import api from "./api";
 
 /**
+ * Cadastra um novo usuário
+ */
+export async function cadastrarUsuario({ nome, email, senha }) {
+  const { data } = await api.post("/usuarios/salvar", {
+    nome,
+    email,
+    senha,
+  });
+  return data;
+}
+
+/**
  * Busca o id do usuário pelo email usando /usuarios/listar
  * Retorna Number(id) ou null se não achar.
  */
