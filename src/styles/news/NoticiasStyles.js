@@ -134,7 +134,6 @@ export const styles = StyleSheet.create({
     backgroundColor: "#E5E7EB",
   },
 
-  /* ----- Botão “Ver mais” ----- */
   verMaisBtn: {
     marginHorizontal: 12,
     marginTop: 14,

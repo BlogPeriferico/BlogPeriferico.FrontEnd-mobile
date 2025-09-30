@@ -18,7 +18,7 @@ import { useRegionTheme } from "../../utils/regionTheme";
 import RegionSelector from "../../components/RegionSelector";
 import { useRegiao } from "../../contexts/RegionContext";
 
-// Função para mapear a região para o enum do backend
+// 🔹 Mapear nome da região para enum do backend
 function mapRegiaoToEnum(regiao) {
   const map = {
     centro: "CENTRO",
@@ -35,7 +35,7 @@ function mapRegiaoToEnum(regiao) {
   return map[key] || "CENTRO";
 }
 
-// Função para recuperar o token de autenticação
+// 🔹 Recuperar token de autenticação
 async function getAuthToken() {
   const keysToTry = [
     "@auth/token",
@@ -65,20 +65,7 @@ export default function NovaNoticia({ navigation, route }) {
   const [loading, setLoading] = useState(false);
   const [regionModal, setRegionModal] = useState(false);
 
-  // Estilo base do input
-  const inputBaseStyle = useMemo(
-    () => ({
-      backgroundColor: "#fff",
-      borderWidth: 1,
-      borderColor: "#E5E7EB",
-      paddingHorizontal: 12,
-      paddingVertical: 10,
-      color: "#111827",
-    }),
-    []
-  );
-
-  // Função para escolher uma imagem
+  // 🔹 Escolher imagem
   const escolherImagem = useCallback(async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (perm.status !== "granted") {
@@ -100,7 +87,7 @@ export default function NovaNoticia({ navigation, route }) {
     }
   }, []);
 
-  // Função para enviar a notícia
+  // 🔹 Enviar notícia
   const enviar = useCallback(async () => {
     if (!titulo.trim() || !texto.trim()) {
       Alert.alert("Campos obrigatórios", "Informe pelo menos título e descrição.");
@@ -115,7 +102,14 @@ export default function NovaNoticia({ navigation, route }) {
       console.log("   body(dto):", JSON.stringify({ titulo, texto, local, zona }));
       console.log("   hasFile:", Boolean(img?.uri));
 
-      const resp = await criarNoticia({ titulo, texto, local, zona, imagemFile: img, token });
+      const resp = await criarNoticia({
+        titulo,
+        texto,
+        local,
+        zona,
+        imagemFile: img,
+        token,
+      });
       console.log("✅ criada:", resp?.id ?? "(sem id)");
       Alert.alert("Sucesso", "Notícia criada!");
       navigation.goBack?.();
@@ -124,7 +118,8 @@ export default function NovaNoticia({ navigation, route }) {
       let msg = "Erro interno no servidor. Tente novamente mais tarde.";
       if (e?.message?.includes("401") || e?.message?.includes("403"))
         msg = "Sessão expirada ou sem permissão. Faça login novamente.";
-      if (e?.message?.includes("userId")) msg = "Não foi possível identificar o usuário. Faça login novamente.";
+      if (e?.message?.includes("userId"))
+        msg = "Não foi possível identificar o usuário. Faça login novamente.";
       Alert.alert("Erro", msg);
     } finally {
       setLoading(false);
@@ -133,10 +128,20 @@ export default function NovaNoticia({ navigation, route }) {
 
   return (
     <>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1, backgroundColor: "#FAFAFA" }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1, backgroundColor: "#FAFAFA" }}
+      >
         <ScrollView contentContainerStyle={{ padding: 16 }}>
-          <TouchableOpacity onPress={() => navigation?.goBack?.()} activeOpacity={0.8} style={{ marginBottom: 8 }}>
-            <Text style={{ color: colors.primary, fontWeight: "600" }}>◀ Voltar</Text>
+          {/* Voltar */}
+          <TouchableOpacity
+            onPress={() => navigation?.goBack?.()}
+            activeOpacity={0.8}
+            style={{ marginBottom: 8 }}
+          >
+            <Text style={{ color: colors.primary, fontWeight: "600", marginTop: 30}}>
+              ◀ Voltar
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -149,82 +154,131 @@ export default function NovaNoticia({ navigation, route }) {
               borderWidth: 2,
               borderColor: colors.primary,
               borderRadius: 12,
-              backgroundColor: colors.soft,
+              backgroundColor: "#fff",
               alignItems: "center",
               justifyContent: "center",
-              marginTop: 8,
+              marginTop: 10,
               marginBottom: 16,
             }}
           >
             {img?.uri ? (
-              <Image source={{ uri: img.uri }} style={{ width: "100%", height: "100%", borderRadius: 10 }} />
+              <Image
+                source={{ uri: img.uri }}
+                style={{ width: "100%", height: "100%", borderRadius: 10 }}
+              />
             ) : (
               <>
-                <Text style={{ fontSize: 28, color: colors.primary, marginBottom: 6 }}>＋</Text>
+                <Image
+                  source={require("../../assets/gifs/add.gif")}
+                  style={{ width: 60, height: 60, marginBottom: 6 }}
+                />
                 <Text style={{ color: "#9CA3AF" }}>Adicione uma imagem</Text>
               </>
             )}
           </TouchableOpacity>
 
-          <View style={{ backgroundColor: colors.soft, padding: 14 }}>
-            <Text style={{ fontWeight: "700", color: "#111827", marginBottom: 6 }}>Título</Text>
+          {/* 🔹 Formulário - sem fundo azul, seguindo cor da tela */}
+          <View style={{ padding: 4, marginTop: 15}}>
+            <Text style={{ fontWeight: "600", color: colors.primary, marginBottom: 6 }}>
+              Título
+            </Text>
             <TextInput
               value={titulo}
               onChangeText={setTitulo}
               placeholder="Digite o título"
-              placeholderTextColor="#9CA3AF"
-              style={[inputBaseStyle, { borderRadius: 8, marginBottom: 12 }]}
+              placeholderTextColor={colors.border}
+              style={{
+                backgroundColor: "#fff",
+                borderWidth: 1,
+                borderColor: colors.primary,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 6,
+                marginBottom: 12,
+                color: "#111827",
+              }}
             />
 
-            <Text style={{ fontWeight: "700", color: "#111827", marginBottom: 6 }}>Região</Text>
+            <Text style={{ fontWeight: "600", color: colors.primary, marginBottom: 6 }}>
+              Região
+            </Text>
             <TouchableOpacity
               onPress={() => setRegionModal(true)}
               activeOpacity={0.85}
-              style={[
-                inputBaseStyle,
-                { borderRadius: 8, marginBottom: 12, borderColor: colors.border, justifyContent: "center", height: 44 },
-              ]}
+              style={{
+                backgroundColor: "#fff",
+                borderWidth: 1,
+                borderColor: colors.primary,
+                borderRadius: 6,
+                marginBottom: 12,
+                justifyContent: "center",
+                height: 44,
+                paddingHorizontal: 12,
+              }}
             >
               <Text style={{ color: "#111827" }}>
                 {zona === "NOROESTE2" ? "noroeste (2)" : String(zona).toLowerCase()}
               </Text>
             </TouchableOpacity>
 
-            <Text style={{ fontWeight: "700", color: "#111827", marginBottom: 6 }}>Descrição</Text>
+            <Text style={{ fontWeight: "600", color: colors.primary, marginBottom: 6 }}>
+              Descrição
+            </Text>
             <TextInput
               value={texto}
               onChangeText={setTexto}
               placeholder="Digite a descrição"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.border}
               multiline
               numberOfLines={6}
               textAlignVertical="top"
-              style={[inputBaseStyle, { minHeight: 120, borderRadius: 8, marginBottom: 18 }]}
+              style={{
+                backgroundColor: "#fff",
+                borderWidth: 1,
+                borderColor: colors.primary,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 6,
+                minHeight: 120,
+                marginBottom: 18,
+                color: "#111827",
+              }}
             />
 
-            <Text style={{ fontWeight: "700", color: "#111827", marginBottom: 6 }}>Local (opcional)</Text>
+            <Text style={{ fontWeight: "600", color: colors.primary, marginBottom: 6 }}>
+              Local (opcional)
+            </Text>
             <TextInput
               value={local}
               onChangeText={setLocal}
               placeholder="Ex.: São Paulo, Centro"
-              placeholderTextColor="#9CA3AF"
-              style={[inputBaseStyle, { borderRadius: 8, marginBottom: 18 }]}
+              placeholderTextColor={colors.border}
+              style={{
+                backgroundColor: "#fff",
+                borderWidth: 1,
+                borderColor: colors.primary,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 6,
+                marginBottom: 18,
+                color: "#111827",
+              }}
             />
 
+            {/* 🔹 Botão de envio */}
             <TouchableOpacity
               onPress={enviar}
               disabled={loading}
               activeOpacity={0.9}
               style={{
-                backgroundColor: loading ? "#9CA3AF" : colors.primary,
+                backgroundColor: loading ? colors.border : colors.primary,
                 height: 46,
                 alignItems: "center",
                 justifyContent: "center",
-                borderRadius: 10,
-                elevation: 2,
+                borderRadius: 8,
               }}
             >
-              <Text style={{ color: colors.textOnPrimary, fontWeight: "700" }}>
+              <Text style={{ color: colors.textOnPrimary, fontWeight: "600" }}>
                 {loading ? "Adicionando..." : "Adicionar"}
               </Text>
             </TouchableOpacity>
@@ -232,7 +286,14 @@ export default function NovaNoticia({ navigation, route }) {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      <RegionSelector visible={regionModal} onClose={() => { setZona(mapRegiaoToEnum(regiao)); setRegionModal(false); }} />
+      {/* 🔹 Modal de seleção de região */}
+      <RegionSelector
+        visible={regionModal}
+        onClose={() => {
+          setZona(mapRegiaoToEnum(regiao));
+          setRegionModal(false);
+        }}
+      />
     </>
   );
 }

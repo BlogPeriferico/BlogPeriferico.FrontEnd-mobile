@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F4F6F8",
+    backgroundColor: "#F9FAFB",
   },
   notFoundContainer: {
     flex: 1,
@@ -96,22 +96,90 @@ export const styles = StyleSheet.create({
     backgroundColor: "#E5E7EB",
     marginVertical: 8,
   },
-  commentsHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 8,
-  },
-  commentsCount: {
-    fontSize: 14,
-    color: "#111827",
-    fontWeight: "600",
-  },
   body: {
     fontSize: 15,
     color: "#374151",
     lineHeight: 24,
     marginTop: 6,
     marginBottom: 18,
+  },
+
+  // 🔹 Toggle de comentários
+  comentarioToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: "#E5E7EB",
+    marginTop: 8,
+  },
+  comentarioToggleText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#111827",
+  },
+
+  // 🔹 Seção de comentários
+  comentariosContainer: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    paddingVertical: 8,
+    marginTop: 8,
+  },
+  comentariosTitulo: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  comentarioItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#E5E7EB",
+  },
+  avatarImg: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 10,
+  },
+  avatarPlaceholder: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#d1d5db",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  comentarioHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  comentarioNome: {
+    fontWeight: "600",
+    fontSize: 14,
+    color: "#111827",
+  },
+  comentarioData: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  comentarioTexto: {
+    fontSize: 14,
+    color: "#374151",
+  },
+  semComentarios: {
+    fontSize: 14,
+    color: "#6B7280",
+    textAlign: "center",
+    paddingVertical: 10,
   },
 });
