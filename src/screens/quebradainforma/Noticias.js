@@ -170,10 +170,10 @@ export default function Noticias({ navigation }) {
               </TouchableOpacity>
             ) : null}
 
-            {/* LISTA DOS DEMAIS — layout Figma */}
-            {restantes.map((item) => (
+            {/* LISTA DOS DEMAIS */}
+            {restantes.map((item, index) => (
               <TouchableOpacity
-                key={item.id}
+                key={`${item.id}-${index}`} // 🔑 garante que não repete
                 activeOpacity={0.88}
                 onPress={() => goDetalhe(item)}
                 style={s.itemCard}
@@ -188,7 +188,7 @@ export default function Noticias({ navigation }) {
                       {(item.regiao || "Centro").toUpperCase()}
                     </Text>
                     <Text style={s.itemDate} numberOfLines={1}>
-                      {formatDatePt(item.dataIso)}
+                      {formatDatePt(item.dataHoraCriacao)} {/* ✅ corrigido */}
                     </Text>
                   </View>
                 </View>

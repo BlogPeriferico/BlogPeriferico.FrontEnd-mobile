@@ -109,11 +109,10 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 12,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: "#E5E7EB",
-    marginTop: 8,
+    padding: 12,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 8,
+    marginBottom: 12,
   },
   comentarioToggleText: {
     fontSize: 14,
@@ -123,25 +122,23 @@ export const styles = StyleSheet.create({
 
   // 🔹 Seção de comentários
   comentariosContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    paddingVertical: 8,
-    marginTop: 8,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
   },
   comentariosTitulo: {
     fontSize: 15,
     fontWeight: "700",
     color: "#111827",
-    marginBottom: 8,
-    textAlign: "center",
+    marginBottom: 12,
   },
   comentarioItem: {
     flexDirection: "row",
     alignItems: "flex-start",
     paddingVertical: 12,
-    paddingHorizontal: 8,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "#D1D5DB",
   },
   avatarImg: {
     width: 36,
@@ -181,5 +178,32 @@ export const styles = StyleSheet.create({
     color: "#6B7280",
     textAlign: "center",
     paddingVertical: 10,
+  },
+
+  // 🔹 Novo comentário (estilo YouTube)
+  novoComentarioContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 10,
+  },
+  novoComentarioInput: {
+    flex: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: "#D1D5DB",
+    fontSize: 14,
+    paddingVertical: 4,
+    color: "#111827",
+  },
+  botaoPublicar: {
+    alignSelf: "flex-end",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: "#2563EB",
+    borderRadius: 6,
+    marginBottom: 10,
+  },
+  botaoPublicarTexto: {
+    color: "#fff",
+    fontWeight: "600",
   },
 });
