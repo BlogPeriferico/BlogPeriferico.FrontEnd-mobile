@@ -4,9 +4,9 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import NoticiasStack from "./NoticiasStack";
-import DoacoesScreen from "../screens/doacoes/Doacoes.js";
-import AchadinhosScreen from "../screens/achadinhos/Achadinhos.js";
-import MaoAmigaScreen from "../screens/maoamiga/MaoAmiga.js";
+import DoacaoStack from "./DoacaoStack"; 
+import AchadinhosScreen from "../screens/achadinhos/Achadinhos";
+import MaoAmigaScreen from "../screens/maoamiga/MaoAmiga";
 
 import IconNews from "../assets/svgs/tab/Jornal.svg";
 import IconHandHeart from "../assets/svgs/tab/MaoCoracao.svg";
@@ -22,7 +22,6 @@ export default function BottomTabs() {
   const INACTIVE = "#7C7C7C";
   const BG = "#fff";
 
-  // Altura útil + área segura
   const baseHeight = 58;
   const totalHeight = baseHeight + Math.max(insets.bottom, 10);
 
@@ -38,28 +37,20 @@ export default function BottomTabs() {
         headerShown: false,
         tabBarShowLabel: false,
         tabBarHideOnKeyboard: true,
-
-        // tela sem margens extras
         sceneContainerStyle: { backgroundColor: "transparent" },
-
-        // ⬇️ Full-width, encostado em baixo
         tabBarStyle: [
           {
-            position: "relative",          // participa do fluxo, não sobrepõe
+            position: "relative",
             height: totalHeight,
             backgroundColor: BG,
             borderTopWidth: 0,
-            borderRadius: 0,               // sem cantos – preenche de lado a lado
             paddingHorizontal: 24,
             paddingTop: 10,
-            paddingBottom: Math.max(insets.bottom, 12), // respeita safe area
+            paddingBottom: Math.max(insets.bottom, 12),
           },
           SHADOW,
         ],
-
         tabBarItemStyle: { paddingVertical: 6 },
-
-        // fundo padrão (sem bordas), mantém compatibilidade
         tabBarBackground: () => <View style={{ flex: 1 }} />,
       }}
     >
@@ -72,15 +63,18 @@ export default function BottomTabs() {
           ),
         }}
       />
+
+      {/* 🆕 Doações com stack completo */}
       <Tab.Screen
         name="DoacoesTab"
-        component={DoacoesScreen}
+        component={DoacaoStack}
         options={{
           tabBarIcon: ({ focused }) => (
             <IconHandHeart width={28} height={28} color={focused ? ACTIVE : INACTIVE} />
           ),
         }}
       />
+
       <Tab.Screen
         name="AchadinhosTab"
         component={AchadinhosScreen}
@@ -90,6 +84,7 @@ export default function BottomTabs() {
           ),
         }}
       />
+
       <Tab.Screen
         name="MaoAmigaTab"
         component={MaoAmigaScreen}

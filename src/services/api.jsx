@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const TOKEN_KEY = "@auth/token";
 
 const api = axios.create({
-  baseURL: "https://blogperigericobackend.azurewebsites.net",
+  baseURL: "https://backblog.azurewebsites.net",
   timeout: 15000,
 });
 

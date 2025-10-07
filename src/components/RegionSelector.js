@@ -6,7 +6,7 @@ import { useRegiao } from "../contexts/RegionContext";
 
 const REGIOES = [
   "centro","norte","sul","leste","oeste",
-  "sudeste","sudoeste","noroeste","noroeste2"
+  "sudeste","sudoeste","nordeste","noroeste"
 ];
 
 export default function RegionSelector({ visible, onClose }) {

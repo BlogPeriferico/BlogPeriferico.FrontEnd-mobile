@@ -32,7 +32,7 @@ function mapNoticiaFromDTO(n) {
 }
 
 /** CRIAÇÃO via fetch (FormData) — envia idUsuario numérico */
-const BASE_URL = "https://blogperigericobackend.azurewebsites.net";
+const BASE_URL = "https://backblog.azurewebsites.net";
 
 export async function criarNoticia({ titulo, texto, local, zona, imagemFile, token }) {
   const [storedToken, storedUserId] = await Promise.all([getToken(), getUserId()]);
