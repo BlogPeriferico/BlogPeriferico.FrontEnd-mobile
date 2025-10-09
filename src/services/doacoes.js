@@ -52,13 +52,12 @@ export async function criarDoacao({ titulo, descricao, telefone, zona, imagemFil
     });
   }
 
-  // Headers com autorização JWT
+  // 🔑 IMPORTANTE: não setar Content-Type manual no mobile
   const headers = {
     Authorization: `Bearer ${authToken}`,
-    "Content-Type": "multipart/form-data",
   };
 
-  console.log("📤 [REQ] POST /doacoes", dto);
+  console.log("📤 [REQ] POST /doacoes", dto, imagemFile?.uri);
   const { data } = await api.post("/doacoes", formData, { headers });
 
   return mapDoacaoFromDTO(data);
