@@ -4,9 +4,10 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import NoticiasStack from "./NoticiasStack";
-import DoacaoStack from "./DoacaoStack"; 
+import DoacaoStack from "./DoacaoStack";
+import VagasStack from "./VagasStack"; // ⬅️ usa o stack de Vagas
+
 import AchadinhosScreen from "../screens/achadinhos/Achadinhos";
-import MaoAmigaScreen from "../screens/maoamiga/MaoAmiga";
 
 import IconNews from "../assets/svgs/tab/Jornal.svg";
 import IconHandHeart from "../assets/svgs/tab/MaoCoracao.svg";
@@ -23,7 +24,6 @@ export default function BottomTabs() {
   const BG = "#fff";
 
   const baseHeight = 58;
-  const totalHeight = baseHeight + Math.max(insets.bottom, 10);
 
   const SHADOW =
     Platform.OS === "ios"
@@ -41,7 +41,7 @@ export default function BottomTabs() {
         tabBarStyle: [
           {
             position: "relative",
-            height: totalHeight,
+            height: baseHeight + Math.max(insets.bottom, 12),
             backgroundColor: BG,
             borderTopWidth: 0,
             paddingHorizontal: 24,
@@ -64,7 +64,6 @@ export default function BottomTabs() {
         }}
       />
 
-      {/* 🆕 Doações com stack completo */}
       <Tab.Screen
         name="DoacoesTab"
         component={DoacaoStack}
@@ -87,7 +86,7 @@ export default function BottomTabs() {
 
       <Tab.Screen
         name="MaoAmigaTab"
-        component={MaoAmigaScreen}
+        component={VagasStack} // ⬅️ aqui agora é o STACK
         options={{
           tabBarIcon: ({ focused }) => (
             <IconMegaphone width={28} height={28} color={focused ? ACTIVE : INACTIVE} />

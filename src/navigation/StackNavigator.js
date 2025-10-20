@@ -14,18 +14,9 @@ export default function StackNavigator() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Cadastro" component={Cadastro} />
-      <Stack.Screen
-        name="EsqueciSenhaEmail"
-        component={EsqueciSenhaEmail}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="EsqueciSenhaCodigo"
-        component={EsqueciSenhaCodigo}
-        options={{ headerShown: false }}
-      />
-
-      <Stack.Screen name="Noticias" component={BottomTabs} />
+      <Stack.Screen name="EsqueciSenhaEmail" component={EsqueciSenhaEmail} />
+      <Stack.Screen name="EsqueciSenhaCodigo" component={EsqueciSenhaCodigo} />
+      <Stack.Screen name="Main" component={BottomTabs} />
     </Stack.Navigator>
   );
 }
