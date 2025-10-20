@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F3F4F6", // cinza claro para destacar o card
+    backgroundColor: "#FFFFFF", // cinza claro para destacar o card
   },
   scroll: {
     paddingBottom: 24,
@@ -77,7 +77,7 @@ export const styles = StyleSheet.create({
   },
   cardMeta: {
     fontSize: 12,
-    color: "#6B7280", // gray-500
+    color: "#FFFFFF", // gray-500
     marginTop: 2,
   },
 

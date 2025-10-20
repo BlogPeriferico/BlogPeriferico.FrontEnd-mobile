@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Image,
   ActivityIndicator,
   Alert,
   RefreshControl,
@@ -15,10 +14,10 @@ import Header from "../../components/Header";
 import { useRegionTheme } from "../../utils/regionTheme";
 import { getTodasDoacoes, paginaDoacoes } from "../../services/doacoes";
 import AddIcon from "../../assets/svgs/Add.svg";
-import { styles as s } from "../../styles/doacao/DoacoesStyles"; 
-import CarrosselDestaquesDoacao from "../../components/doacao/CarrosselDestaquesDoacao";
+import { styles as s } from "../../styles/doacao/DoacoesStyles";
+import DoacaoCard from "../../components/doacao/DoacaoCard";
+import DoacaoCarrossel from "../../components/doacao/DoacaoCarrossel"; 
 
-/** Deduplica por id preservando a ordem */
 function dedupeById(arr) {
   const seen = new Set();
   const out = [];
@@ -32,40 +31,30 @@ function dedupeById(arr) {
   return out;
 }
 
-// medidas para 2 colunas com gutter
 const SCREEN_W = Dimensions.get("window").width;
-const H_PADDING = 16; // padding horizontal do ScrollView (aplicado no contentContainerStyle)
+const H_PADDING = 16;
 const GUTTER = 12;
-const CARD_W = (SCREEN_W - H_PADDING * 2 - GUTTER) / 2; // 2 colunas
+const CARD_W = (SCREEN_W - H_PADDING * 2 - GUTTER) / 2;
 
 export default function Doacao({ navigation }) {
   const { regiao, colors } = useRegionTheme();
 
-  const [listaCompleta, setListaCompleta] = useState([]); // lista filtrada por região
-  const [itens, setItens] = useState([]);                 // itens exibidos (paginados)
+  const [listaCompleta, setListaCompleta] = useState([]);
+  const [itens, setItens] = useState([]);
   const [pageState, setPageState] = useState({ page: 1, pageSize: 6, hasMore: true });
 
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  React.createElement(CarrosselDestaquesDoacao, {
-  navigation,              // passe o navigation da tela
-  ids: [15, 16, 17],       // fixo como você pediu
-  title: "Doações em destaque"
-})
 
-  // Carrega e filtra por região (igual Notícias)
   const carregar = useCallback(async () => {
     const data = await getTodasDoacoes();
-
     const filtradas = (Array.isArray(data) ? data : []).filter(
-      (d) => d.zona?.toLowerCase() === regiao?.toLowerCase()
+      (d) => d.zona?.toLowerCase?.() === regiao?.toLowerCase?.()
     );
-
     const base = dedupeById(filtradas);
     setListaCompleta(base);
-
-    const pg = paginaDoacoes(base, { page: 1, pageSize: 6 }); // 6 por página (3 linhas)
+    const pg = paginaDoacoes(base, { page: 1, pageSize: 6 });
     setItens(pg.items);
     setPageState({ page: 1, pageSize: 6, hasMore: pg.hasMore });
   }, [regiao]);
@@ -103,7 +92,6 @@ export default function Doacao({ navigation }) {
     try {
       setLoadingMore(true);
       const nextPage = pageState.page + 1;
-
       const pg = paginaDoacoes(listaCompleta, { page: nextPage, pageSize: 6 });
       setItens((old) => dedupeById([...old, ...pg.items]));
       setPageState({ page: nextPage, pageSize: 6, hasMore: pg.hasMore });
@@ -113,13 +101,14 @@ export default function Doacao({ navigation }) {
   };
 
   const goNovaDoacao = () => navigation.navigate("NovaDoacao");
+  const goDetalhe = (d) => navigation.navigate("DetalheDoacao", { id: d.id, doacao: d });
 
   return (
     <View style={s.container}>
       <Header />
 
       <ScrollView
-        contentContainerStyle={[s.scroll, { paddingHorizontal: H_PADDING }]}
+        contentContainerStyle={[s.scroll, { paddingHorizontal: H_PADDING, paddingTop: 12 }]}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -129,6 +118,9 @@ export default function Doacao({ navigation }) {
           />
         }
       >
+        {/* Carrossel fixo (IDs 15,16,17) */}
+        <DoacaoCarrossel navigation={navigation} containerStyle={{ marginBottom: 18 }} />
+
         {/* Título + botão adicionar */}
         <View style={s.headerRow}>
           <Text style={[s.tituloSecao, { color: colors.primary }]}>
@@ -154,43 +146,21 @@ export default function Doacao({ navigation }) {
         ) : (
           <>
             <View style={s.grid}>
-              {itens.map((d, index) => (
-                <View
-                  key={`${d.id}-${index}`}
-                  style={[
-                    s.card,
-                    { width: CARD_W, marginRight: index % 2 === 0 ? GUTTER : 0 },
-                  ]}
-                >
-                  {/* Imagem com cantos arredondados dentro do card */}
-                  <View style={s.cardImageWrap}>
-                    {d.imagem ? (
-                      <Image source={{ uri: d.imagem }} style={s.cardImage} />
-                    ) : (
-                      <View style={s.cardImage} />
-                    )}
-                  </View>
-
-                  {/* Conteúdo */}
-                  <View style={s.cardBody}>
-                    <Text style={s.cardTitle} numberOfLines={2}>
-                      {d.titulo || "Doação"}
-                    </Text>
-
-                    {(d?.doador?.nome || d?.usuarioNome || d?.autorNome || d?.telefone) && (
-                      <Text style={s.cardMeta} numberOfLines={1}>
-                        Doador: {d.doador?.nome || d.usuarioNome || d.autorNome || d.telefone}
-                      </Text>
-                    )}
-
-                    <Text style={s.cardMeta} numberOfLines={1}>
-                      Região: {(d.zona || regiao || "Centro")
-                        .toLowerCase()
-                        .replace(/^./, (c) => c.toUpperCase())}
-                    </Text>
-                  </View>
-                </View>
-              ))}
+              {itens.map((d, index) => {
+                const isLeftCol = index % 2 === 0;
+                return (
+                  <DoacaoCard
+                    key={`${d.id}-${index}`}
+                    item={d}
+                    regiao={regiao}
+                    onPress={() => goDetalhe(d)}
+                    style={{
+                      width: CARD_W,
+                      marginRight: isLeftCol ? GUTTER : 0,
+                    }}
+                  />
+                );
+              })}
             </View>
 
             {/* Botão VER MAIS */}
