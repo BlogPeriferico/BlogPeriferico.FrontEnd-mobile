@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react";
+// src/components/Header.js
+import React, { useRef, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -11,25 +12,68 @@ import {
   Easing,
   StatusBar,
   Platform,
+  DeviceEventEmitter,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "../styles/components/HeaderStyles";
 import RegionSelector from "../components/RegionSelector";
 import { useRegiao } from "../contexts/RegionContext";
 import { useRegionTheme } from "../utils/regionTheme";
+import { navigationRef /*, resetToMain*/ } from "../navigation/navigationRef"; // resetToMain opcional
 
 const { width } = Dimensions.get("window");
+
+// 🔎 mapeia telas de detalhe -> tela de lista alvo
+// ajuste os nomes conforme suas rotas reais
+const ROUTE_SEARCH_TARGETS = {
+  DetalheNoticia: "NoticiasHome",
+  DetalheDoacao: "DoacoesHome",
+  DetalheVaga: "VagasHome",
+};
+
+// pega nome da rota atual (sem depender de helper externo)
+function getActiveRouteName() {
+  try {
+    if (!navigationRef?.isReady?.()) return null;
+    const r = navigationRef.getCurrentRoute?.();
+    return r?.name || null;
+  } catch {
+    return null;
+  }
+}
+
+// 🚀 dispara a busca com base na rota atual
+function dispatchSearch(query) {
+  const q = String(query || "").trim();
+  if (!q) return false;
+
+  const current = getActiveRouteName();
+  const target =
+    ROUTE_SEARCH_TARGETS[current] || // se é detalhe, manda pra lista-mãe
+    current ||                       // se já está numa lista, manda pra ela
+    "NoticiasHome";                  // fallback (ajuste pro melhor default)
+
+  // canal específico por tela
+  const channel = `search:${target}`;
+  DeviceEventEmitter.emit(channel, { q, from: current });
+
+  // (opcional) também um global, caso alguma tela queira ouvir tudo
+  DeviceEventEmitter.emit("app:search", { q, from: current });
+
+  // (opcional) se quiser garantir que a Main/aba esteja ativa, descomente:
+  // try { resetToMain({ target }); } catch {}
+
+  return true;
+}
 
 export default function Header() {
   const [menuAberto, setMenuAberto] = useState(false);
   const [buscando, setBuscando] = useState(false);
   const [busca, setBusca] = useState("");
 
-  // tema por região
   const { colors } = useRegionTheme();
   const { regiao } = useRegiao?.() ?? { regiao: "centro" };
 
-  // modal de região
   const [regionVisible, setRegionVisible] = useState(false);
 
   const menuAnim = useRef(new Animated.Value(0)).current;
@@ -48,7 +92,6 @@ export default function Header() {
     ]).start();
   };
 
-  // ⚠️ IMPORTANTE: só chama cb se for função
   const fecharMenu = (cb) => {
     Animated.parallel([
       Animated.timing(menuAnim, { toValue: 0, duration: 260, easing: Easing.in(Easing.quad), useNativeDriver: false }),
@@ -62,7 +105,7 @@ export default function Header() {
 
   const toggleMenu = () => (menuAberto ? fecharMenu() : abrirMenu());
 
-  // barras do hambúrguer
+  // animações do ícone hambúrguer
   const topBar = {
     transform: [
       { translateY: menuAnim.interpolate({ inputRange: [0, 1], outputRange: [-6, 0] }) },
@@ -80,10 +123,12 @@ export default function Header() {
     ],
   };
 
-  // busca
-  const toggleBusca = () => {
-    const abrir = !buscando;
-    setBuscando(true);
+  // abrir/fechar barra de busca
+  const toggleBusca = (abrirExplícito) => {
+    const abrir = typeof abrirExplícito === "boolean" ? abrirExplícito : !buscando;
+    if (abrir === buscando) return;
+
+    if (abrir) setBuscando(true);
     Animated.timing(searchAnim, {
       toValue: abrir ? 1 : 0,
       duration: abrir ? 320 : 260,
@@ -95,16 +140,36 @@ export default function Header() {
     });
   };
 
+  const doSearch = () => {
+    const ok = dispatchSearch(busca);
+    if (ok) {
+      // Se quiser fechar a barra após pesquisar:
+      // toggleBusca(false);
+      // inputRef.current?.blur();
+    }
+  };
+
+  const limpar = () => {
+    setBusca("");
+    inputRef.current?.clear();
+    inputRef.current?.focus();
+  };
+
+  // interação da lupa
+  const onLupaPressIn = () => Animated.timing(lupaPress, { toValue: 1, duration: 80, useNativeDriver: false }).start();
+  const onLupaPressOut = () =>
+    Animated.timing(lupaPress, { toValue: 0, duration: 80, useNativeDriver: false }).start(() => {
+      if (buscando) doSearch();      // quando já está aberta, tocar na lupa busca
+      else toggleBusca(true);        // quando fechada, abre
+    });
+
   const searchWidth = searchAnim.interpolate({ inputRange: [0, 1], outputRange: [0, width - 120] });
   const tituloOpacity = searchAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
   const lupaRotate = searchAnim.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "90deg"] });
   const lupaScale = lupaPress.interpolate({ inputRange: [0, 1], outputRange: [1, 0.9] });
 
-  const onLupaPressIn = () => Animated.timing(lupaPress, { toValue: 1, duration: 80, useNativeDriver: false }).start();
-  const onLupaPressOut = () => Animated.timing(lupaPress, { toValue: 0, duration: 80, useNativeDriver: false }).start(() => toggleBusca());
-
-  // abrir seletor de região
   const abrirSeletorRegiao = () => fecharMenu(() => setRegionVisible(true));
+  const showClear = useMemo(() => buscando && busca.length > 0, [buscando, busca]);
 
   return (
     <>
@@ -141,7 +206,14 @@ export default function Header() {
                 placeholderTextColor="#555"
                 style={styles.inputBusca}
                 returnKeyType="search"
+                blurOnSubmit
+                onSubmitEditing={doSearch}   // Enter dispara a busca
               />
+              {showClear && (
+                <TouchableOpacity onPress={limpar} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                  <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+                </TouchableOpacity>
+              )}
             </Animated.View>
           </View>
 
@@ -157,8 +229,6 @@ export default function Header() {
         {menuAberto && (
           <View style={styles.fullscreenModal} pointerEvents="box-none">
             <Animated.View style={[styles.modalLateral, { transform: [{ translateX: slideAnim }] }]}>
-
-              {/* Fechar menu – use função, não passe o evento */}
               <Pressable style={styles.botaoFechar} onPress={() => fecharMenu()}>
                 <View style={styles.hamburguer}>
                   <Animated.View style={[styles.hBar, topBar]} />
@@ -167,11 +237,9 @@ export default function Header() {
                 </View>
               </Pressable>
 
-              {/* Itens do menu */}
               <Text style={styles.modalItem}>Perfil</Text>
               <Text style={styles.modalItem}>Notícias</Text>
 
-              {/* Botão: Escolher região */}
               <TouchableOpacity onPress={abrirSeletorRegiao} activeOpacity={0.85} style={{ marginTop: 8 }}>
                 <View
                   style={{
@@ -198,7 +266,6 @@ export default function Header() {
             </Animated.View>
 
             <Animated.View style={[styles.modalOverlay, { opacity: overlayAnim }]}>
-              {/* Tap fora fecha menu — também usando função */}
               <Pressable style={{ flex: 1 }} onPress={() => fecharMenu()} />
             </Animated.View>
           </View>

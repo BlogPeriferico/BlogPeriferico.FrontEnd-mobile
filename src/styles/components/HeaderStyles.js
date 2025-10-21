@@ -1,4 +1,5 @@
-import { StyleSheet, Dimensions, StatusBar, Platform } from "react-native";
+// src/styles/components/HeaderStyles.js
+import { StyleSheet, Dimensions, StatusBar, Platform } from "react-native"; 
 const { width, height } = Dimensions.get("window");
 
 export const styles = StyleSheet.create({
@@ -63,6 +64,8 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#001C30",
   },
+
+  // 🔧 caixa da busca: linha + centralizado vertical
   searchBox: {
     position: "absolute",
     left: 0,
@@ -72,12 +75,29 @@ export const styles = StyleSheet.create({
     backgroundColor: "#f1f1f1",
     overflow: "hidden",
     paddingHorizontal: 10,
-    justifyContent: "center",
+
+    flexDirection: "row",   // <- lado a lado
+    alignItems: "center",   // <- centraliza vertical
   },
+
+  // 🔧 input ocupa a largura e alinha vertical
   inputBusca: {
-    height: 40,
+    flex: 1,                // <- pega todo o espaço
+    height: "100%",
     fontSize: 16,
     color: "#000",
+    paddingVertical: 0,     // <- evita pular no Android
+    includeFontPadding: false, // <- Android: remove padding da fonte
+    paddingRight: 8,        // respiro antes do botão X
+    textAlignVertical: "center",
+  },
+
+  // 🔧 botão do X alinhado
+  clearBtn: {
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingLeft: 6,
   },
 
   // === Drawer / Overlay ===
