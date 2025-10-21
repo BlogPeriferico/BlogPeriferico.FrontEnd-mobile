@@ -7,64 +7,72 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
-  Dimensions,
+  DeviceEventEmitter,
 } from "react-native";
+import { useRoute } from "@react-navigation/native";
 
 import Header from "../../components/Header";
+import DoacaoCard from "../../components/doacao/DoacaoCard";
+import { styles as listS } from "../../styles/doacao/DoacoesStyles";
 import { useRegionTheme } from "../../utils/regionTheme";
 import { getTodasDoacoes, paginaDoacoes } from "../../services/doacoes";
-import AddIcon from "../../assets/svgs/Add.svg";
-import { styles as s } from "../../styles/doacao/DoacoesStyles";
-import DoacaoCard from "../../components/doacao/DoacaoCard";
-import DoacaoCarrossel from "../../components/doacao/DoacaoCarrossel"; 
 
-function dedupeById(arr) {
-  const seen = new Set();
-  const out = [];
-  for (const it of arr) {
-    const k = it?.id ?? "";
-    if (!seen.has(k)) {
-      seen.add(k);
-      out.push(it);
-    }
-  }
-  return out;
-}
-
-const SCREEN_W = Dimensions.get("window").width;
 const H_PADDING = 16;
 const GUTTER = 12;
-const CARD_W = (SCREEN_W - H_PADDING * 2 - GUTTER) / 2;
 
-export default function Doacao({ navigation }) {
+const dbg = (...a) => console.log("🎁[Doacoes]", ...a);
+
+function norm(x) { return String(x ?? "").toLowerCase().trim(); }
+function matchDoacao(item, q) {
+  const n = norm(q);
+  const campos = [
+    item.titulo, item.descricao, item.local,
+    item.regiao, item.zona, item.categoria,
+  ];
+  return campos.some((c) => norm(c).includes(n));
+}
+
+export default function Doacoes({ navigation }) {
+  const route = useRoute();
   const { regiao, colors } = useRegionTheme();
 
-  const [listaCompleta, setListaCompleta] = useState([]);
-  const [itens, setItens] = useState([]);
-  const [pageState, setPageState] = useState({ page: 1, pageSize: 6, hasMore: true });
-
+  const [base, setBase] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  // paginação (quando NÃO está buscando)
+  const [pageState, setPageState] = useState({ page: 1, pageSize: 6, hasMore: true });
+  const [itens, setItens] = useState([]);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // busca
+  const [query, setQuery] = useState("");
+  const [emBusca, setEmBusca] = useState(false);
+  const [resultados, setResultados] = useState([]);
 
   const carregar = useCallback(async () => {
     const data = await getTodasDoacoes();
-    const filtradas = (Array.isArray(data) ? data : []).filter(
-      (d) => d.zona?.toLowerCase?.() === regiao?.toLowerCase?.()
+    const filtradas = (data || []).filter(
+      (d) => norm(d.regiao ?? d.zona) === norm(regiao)
     );
-    const base = dedupeById(filtradas);
-    setListaCompleta(base);
-    const pg = paginaDoacoes(base, { page: 1, pageSize: 6 });
-    setItens(pg.items);
-    setPageState({ page: 1, pageSize: 6, hasMore: pg.hasMore });
-  }, [regiao]);
+    setBase(filtradas);
+
+    if (!emBusca) {
+      const pg = paginaDoacoes(filtradas, { page: 1, pageSize: 6 });
+      setItens(pg.items);
+      setPageState({ page: 1, pageSize: 6, hasMore: pg.hasMore });
+    } else {
+      const novos = filtradas.filter((d) => matchDoacao(d, query));
+      setResultados(novos);
+    }
+  }, [regiao, emBusca, query]);
 
   const load = useCallback(async () => {
     try {
       setLoading(true);
       await carregar();
     } catch (e) {
-      console.log("❌ carregar doações:", e?.message || e);
+      dbg("ERRO carregar:", e?.message || e);
       Alert.alert("Erro", "Não foi possível carregar as doações.");
     } finally {
       setLoading(false);
@@ -80,7 +88,6 @@ export default function Doacao({ navigation }) {
       setRefreshing(true);
       await carregar();
     } catch (e) {
-      console.log("❌ refresh doações:", e?.message || e);
       Alert.alert("Erro", "Falha ao atualizar as doações.");
     } finally {
       setRefreshing(false);
@@ -88,27 +95,70 @@ export default function Doacao({ navigation }) {
   }, [carregar]);
 
   const handleVerMais = async () => {
-    if (!pageState.hasMore || loadingMore) return;
+    if (!pageState.hasMore || loadingMore || emBusca) return;
     try {
       setLoadingMore(true);
-      const nextPage = pageState.page + 1;
-      const pg = paginaDoacoes(listaCompleta, { page: nextPage, pageSize: 6 });
-      setItens((old) => dedupeById([...old, ...pg.items]));
-      setPageState({ page: nextPage, pageSize: 6, hasMore: pg.hasMore });
+      const next = pageState.page + 1;
+      const pg = paginaDoacoes(base, { page: next, pageSize: pageState.pageSize });
+      setItens((old) => [...old, ...pg.items]);
+      setPageState({ page: next, pageSize: pageState.pageSize, hasMore: pg.hasMore });
     } finally {
       setLoadingMore(false);
     }
   };
 
-  const goNovaDoacao = () => navigation.navigate("NovaDoacao");
+  const aplicarBusca = useCallback((q) => {
+    const qStr = String(q || "").trim();
+    setQuery(qStr);
+    if (!qStr) {
+      setEmBusca(false);
+      const pg = paginaDoacoes(base, { page: 1, pageSize: 6 });
+      setItens(pg.items);
+      setPageState({ page: 1, pageSize: 6, hasMore: pg.hasMore });
+      return;
+    }
+    setEmBusca(true);
+    setResultados(base.filter((i) => matchDoacao(i, qStr)));
+  }, [base]);
+
+  // listeners de busca
+  useEffect(() => {
+    const s1 = DeviceEventEmitter.addListener("search:scope:doacoes", ({ q, from }) => {
+      dbg("📥 escopo", q, "from:", from);
+      aplicarBusca(q);
+    });
+    const s2 = DeviceEventEmitter.addListener("search:DoacoesHome", ({ q }) => {
+      dbg("📥 rota DoacoesHome", q);
+      aplicarBusca(q);
+    });
+    const s3 = DeviceEventEmitter.addListener("app:search", ({ q, scope }) => {
+      if (scope === "doacoes") {
+        dbg("📥 global (scope ok)", q);
+        aplicarBusca(q);
+      }
+    });
+    return () => { s1.remove(); s2.remove(); s3.remove(); };
+  }, [aplicarBusca]);
+
+  // via navegação
+  useEffect(() => {
+    if (typeof route?.params?.q === "string") {
+      aplicarBusca(route.params.q);
+      try { navigation.setParams({ q: undefined }); } catch {}
+    }
+  }, [route?.params?.q, aplicarBusca, navigation]);
+
+  const dataRender = emBusca ? resultados : itens;
+  const hasMore = !emBusca && pageState.hasMore;
+
   const goDetalhe = (d) => navigation.navigate("DetalheDoacao", { id: d.id, doacao: d });
 
   return (
-    <View style={s.container}>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <Header />
 
       <ScrollView
-        contentContainerStyle={[s.scroll, { paddingHorizontal: H_PADDING, paddingTop: 12 }]}
+        contentContainerStyle={{ paddingHorizontal: H_PADDING, paddingBottom: 20 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -118,66 +168,68 @@ export default function Doacao({ navigation }) {
           />
         }
       >
-        {/* Carrossel fixo (IDs 15,16,17) */}
-        <DoacaoCarrossel navigation={navigation} containerStyle={{ marginBottom: 18 }} />
+        <View style={{ paddingTop: 90, paddingBottom: 8 }}>
+          <View style={[listS.tituloRow, { marginBottom: 8 }]}>
+            <Text style={[listS.tituloSecao, { color: colors.primary }]}>
+              {emBusca ? "Resultados de doações" : "Seleções de Doações"}
+            </Text>
 
-        {/* Título + botão adicionar */}
-        <View style={s.headerRow}>
-          <Text style={[s.tituloSecao, { color: colors.primary }]}>
-            Seleções De Doações
-          </Text>
-          <TouchableOpacity
-            onPress={goNovaDoacao}
-            accessibilityLabel="Adicionar doação"
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            style={[s.addBtn, { borderColor: colors.primary }]}
-          >
-            <AddIcon width={16} height={16} color={colors.primary} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Lista / Grid */}
-        {loading ? (
-          <ActivityIndicator size="large" color={colors.primary} />
-        ) : itens.length === 0 ? (
-          <Text style={{ textAlign: "center", color: "#6B7280", marginTop: 40 }}>
-            Nenhuma doação encontrada nesta região.
-          </Text>
-        ) : (
-          <>
-            <View style={s.grid}>
-              {itens.map((d, index) => {
-                const isLeftCol = index % 2 === 0;
-                return (
-                  <DoacaoCard
-                    key={`${d.id}-${index}`}
-                    item={d}
-                    regiao={regiao}
-                    onPress={() => goDetalhe(d)}
-                    style={{
-                      width: CARD_W,
-                      marginRight: isLeftCol ? GUTTER : 0,
-                    }}
-                  />
-                );
-              })}
-            </View>
-
-            {/* Botão VER MAIS */}
-            {pageState.hasMore && (
+            {emBusca ? (
               <TouchableOpacity
-                onPress={handleVerMais}
-                disabled={loadingMore}
-                activeOpacity={0.9}
-                style={[s.verMaisBtn, { backgroundColor: colors.primary }]}
+                onPress={() => aplicarBusca("")}
+                activeOpacity={0.85}
+                style={[listS.verMaisBtn, { backgroundColor: "#fff", borderColor: colors.primary, borderWidth: 1 }]}
               >
-                <Text style={s.verMaisLabel}>
-                  {loadingMore ? "Carregando..." : "Ver mais"}
-                </Text>
+                <Text style={[listS.verMaisLabel, { color: colors.primary }]}>Limpar</Text>
               </TouchableOpacity>
-            )}
-          </>
-        )}
+            ) : null}
+          </View>
+
+          {emBusca && (
+            <Text style={{ color: "#6B7280", marginBottom: 8 }}>
+              {dataRender.length} resultado{dataRender.length === 1 ? "" : "s"}
+              {query ? ` para “${query}”` : ""}
+            </Text>
+          )}
+
+          {loading ? (
+            <ActivityIndicator size="small" color={colors.primary} style={{ marginVertical: 16 }} />
+          ) : dataRender.length === 0 ? (
+            <Text style={{ textAlign: "center", color: "#6B7280", marginVertical: 16 }}>
+              {emBusca ? "Sem resultados para a busca." : "Nenhuma doação nesta região."}
+            </Text>
+          ) : (
+            <>
+              <View style={listS.grid}>
+                {dataRender.map((d, index) => {
+                  const isLeftCol = index % 2 === 0;
+                  return (
+                    <DoacaoCard
+                      key={`${d.id}-${index}`}
+                      item={d}
+                      regiao={regiao}
+                      onPress={() => goDetalhe(d)}
+                      style={{ marginRight: isLeftCol ? GUTTER : 0 }}
+                    />
+                  );
+                })}
+              </View>
+
+              {hasMore && (
+                <TouchableOpacity
+                  onPress={handleVerMais}
+                  disabled={loadingMore}
+                  activeOpacity={0.9}
+                  style={[listS.verMaisBtn, { backgroundColor: colors.primary }]}
+                >
+                  <Text style={listS.verMaisLabel}>
+                    {loadingMore ? "Carregando..." : "Ver mais"}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </>
+          )}
+        </View>
       </ScrollView>
     </View>
   );
