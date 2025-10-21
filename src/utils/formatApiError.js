@@ -1,32 +1,26 @@
-export function formatApiError(error, context = "default") {
-  const status = error?.response?.status;
-  const data = error?.response?.data;
-  const raw =
-    typeof data === "string" ? data : data?.message || data?.error || error?.message || "Ocorreu um erro.";
+// src/utils/formatApiError.js
+export function formatApiError(error, scope = "") {
+  try {
+    const status = error?.status ?? error?.response?.status;
+    const code   = error?.code ?? error?.response?.data?.code;
 
-  if (context === "login") {
-    if (status === 401) return "E-mail ou senha incorretos.";
-    if (status === 500) return "Erro interno no servidor. Tente mais tarde.";
-    return raw;
+    // 🔑 401 com escopo diferenciado
+    if (status === 401) {
+      if (scope === "login") return "Não foi possível entrar. E-mail ou senha inválidos.";
+      return "Sessão inválida ou expirada. Faça o login novamente.";
+    }
+
+    if (code === "ECONNABORTED") return "A conexão demorou para responder. Tente novamente.";
+    if (status === 403) return "Você não tem permissão para esta ação.";
+    if (status === 404) return "Recurso não encontrado.";
+    if (status >= 500) return "Erro no servidor. Tente novamente em instantes.";
+
+    const apiMsg =
+      error?.response?.data?.message ||
+      error?.data?.message ||
+      error?.message;
+    return apiMsg || "Ocorreu um erro inesperado.";
+  } catch {
+    return "Ocorreu um erro inesperado.";
   }
-
-  if (context === "cadastro") {
-    if (status === 409 || (status === 400 && /email/i.test(String(raw))))
-      return "Este e-mail já está cadastrado. Tente outro.";
-    if (status === 500) return "Erro interno no servidor. Tente novamente mais tarde.";
-    return raw;
-  }
-
-  if (context === "recovery-send") {
-    if (status === 404) return "E-mail não encontrado.";
-    if (status === 500) return "Erro ao enviar o código. Tente novamente mais tarde.";
-    return raw;
-  }
-
-  if (context === "recovery-confirm") {
-    if (status === 400) return "Código inválido ou expirado.";
-    return raw;
-  }
-
-  return raw;
 }
