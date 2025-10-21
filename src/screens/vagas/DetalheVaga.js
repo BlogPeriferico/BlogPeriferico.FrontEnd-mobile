@@ -11,13 +11,18 @@ import {
   ScrollView,
   Linking,
   Dimensions,
+  TextInput,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { styles as s } from "../../styles/vaga/DetalheVagaStyles";
 import { styles as listS } from "../../styles/vaga/VagasStyles";
+import { styles as ns } from "../../styles/news/DetalheNoticiaStyles"; // reaproveita estilos de comentários (notícias)
 import VagaCard from "../../components/vaga/VagaCard";
 import { useRegionTheme } from "../../utils/regionTheme";
 import api from "../../services/api";
 import { getTodasVagas, paginaVagas } from "../../services/vagas";
+import { getToken, getUserId } from "../../services/auth";
+import { listComentariosVaga, criarComentarioVaga } from "../../services/comentarios";
 
 function dedupeById(arr) {
   const seen = new Set();
@@ -52,6 +57,18 @@ function buildWhatsAppLink(telefone, titulo) {
   return `https://wa.me/${normalized}?text=${texto}`;
 }
 
+function formatDatePt(dateIso) {
+  try {
+    const d = new Date(dateIso);
+    const dia = String(d.getDate()).padStart(2, "0");
+    const mes = String(d.getMonth() + 1).padStart(2, "0");
+    const ano = String(d.getFullYear()).slice(-2);
+    return `${dia}/${mes}/${ano}`;
+  } catch {
+    return "";
+  }
+}
+
 export default function DetalheVaga({ route, navigation }) {
   const { colors, regiao } = useRegionTheme();
   const vagaParam = route?.params?.vaga;
@@ -71,6 +88,8 @@ export default function DetalheVaga({ route, navigation }) {
         } else if (idParam != null) {
           const { data } = await api.get(`/vagas/${idParam}`);
           if (live) setVaga(data);
+        } else {
+          throw new Error("Parâmetros inválidos para abrir a vaga.");
         }
       } catch (e) {
         if (live) setErro(e?.message || "Erro ao carregar vaga");
@@ -101,6 +120,86 @@ export default function DetalheVaga({ route, navigation }) {
     }
   }, [whatsappHref]);
 
+  // ===============================
+  // Comentários (NOVO)
+  // ===============================
+  const [comentarios, setComentarios] = useState([]);
+  const [loadingComentarios, setLoadingComentarios] = useState(false);
+  const [showComentarios, setShowComentarios] = useState(false);
+  const [novoComentario, setNovoComentario] = useState("");
+  const [enviando, setEnviando] = useState(false);
+
+  // Contagem/preview inicial
+  useEffect(() => {
+    (async () => {
+      try {
+        if (vaga?.id) {
+          const lista = await listComentariosVaga(vaga.id);
+          setComentarios(lista);
+        }
+      } catch {
+        setComentarios([]);
+      }
+    })();
+  }, [vaga?.id]);
+
+  // Lista completa ao abrir a seção
+  useEffect(() => {
+    (async () => {
+      if (showComentarios && vaga?.id) {
+        setLoadingComentarios(true);
+        try {
+          const lista = await listComentariosVaga(vaga.id);
+          setComentarios(lista);
+        } catch {
+          setComentarios([]);
+        } finally {
+          setLoadingComentarios(false);
+        }
+      }
+    })();
+  }, [showComentarios, vaga?.id]);
+
+  const enviarComentario = useCallback(async () => {
+    try {
+      const token = await getToken();
+      const userId = await getUserId();
+
+      if (!userId) {
+        Alert.alert("Erro", "Usuário não identificado. Faça login novamente.");
+        return;
+      }
+      if (!novoComentario.trim()) {
+        Alert.alert("Aviso", "Digite algo antes de comentar.");
+        return;
+      }
+
+      setEnviando(true);
+
+      const criado = await criarComentarioVaga({
+        texto: novoComentario,
+        idVaga: vaga.id,
+        idUsuario: Number(userId),
+        token,
+      });
+
+      Alert.alert("Sucesso", "Comentário publicado!");
+      setNovoComentario("");
+      setComentarios((prev) => [...prev, criado]);
+    } catch (e) {
+      console.error("❌ Erro ao comentar:", e);
+      Alert.alert(
+        "Erro",
+        e?.response?.data?.message || "Não foi possível enviar o comentário."
+      );
+    } finally {
+      setEnviando(false);
+    }
+  }, [novoComentario, vaga?.id]);
+
+  // ===============================
+  // Relacionadas
+  // ===============================
   const [relLoading, setRelLoading] = useState(true);
   const [relItens, setRelItens] = useState([]);
   const [relState, setRelState] = useState({ page: 1, pageSize: 6, hasMore: true });
@@ -196,6 +295,79 @@ export default function DetalheVaga({ route, navigation }) {
                     {vaga?.descricao?.trim()?.length ? vaga.descricao : "Sem descrição fornecida."}
                   </Text>
                 </View>
+
+                {/* =============== Comentários =============== */}
+                <TouchableOpacity
+                  style={ns.comentarioToggle}
+                  onPress={() => setShowComentarios((prev) => !prev)}
+                >
+                  <Text style={ns.comentarioToggleText}>
+                    {comentarios.length} comentários
+                  </Text>
+                  <Ionicons
+                    name={showComentarios ? "chevron-up" : "chevron-down"}
+                    size={18}
+                    color="#374151"
+                  />
+                </TouchableOpacity>
+
+                {showComentarios && (
+                  <View style={ns.comentariosContainer}>
+                    <Text style={ns.comentariosTitulo}>Comentários</Text>
+
+                    {/* Input estilo YouTube */}
+                    <View style={ns.novoComentarioContainer}>
+                      <View style={ns.avatarPlaceholder}>
+                        <Ionicons name="person" size={20} color="#888" />
+                      </View>
+                      <TextInput
+                        value={novoComentario}
+                        onChangeText={setNovoComentario}
+                        placeholder="Adicione um comentário..."
+                        placeholderTextColor="#9CA3AF"
+                        style={ns.novoComentarioInput}
+                        multiline
+                      />
+                    </View>
+                    <TouchableOpacity
+                      style={[ns.botaoPublicar, enviando && { opacity: 0.6 }]}
+                      onPress={enviarComentario}
+                      disabled={enviando}
+                    >
+                      <Text style={ns.botaoPublicarTexto}>
+                        {enviando ? "Publicando..." : "Publicar"}
+                      </Text>
+                    </TouchableOpacity>
+
+                    {loadingComentarios ? (
+                      <ActivityIndicator size="small" color={colors.primary} />
+                    ) : comentarios.length > 0 ? (
+                      comentarios.map((item) => (
+                        <View key={`${item.id}`} style={ns.comentarioItem}>
+                          {item.fotoUsuario ? (
+                            <Image source={{ uri: item.fotoUsuario }} style={ns.avatarImg} />
+                          ) : (
+                            <View style={ns.avatarPlaceholder}>
+                              <Ionicons name="person" size={20} color="#888" />
+                            </View>
+                          )}
+                          <View style={{ flex: 1 }}>
+                            <View style={ns.comentarioHeader}>
+                              <Text style={ns.comentarioNome}>{item.nomeUsuario || "Usuário"}</Text>
+                              <Text style={ns.comentarioData}>
+                                {formatDatePt(item.dataHoraCriacao)}
+                              </Text>
+                            </View>
+                            <Text style={ns.comentarioTexto}>{item.texto}</Text>
+                          </View>
+                        </View>
+                      ))
+                    ) : (
+                      <Text style={ns.semComentarios}>Nenhum comentário ainda.</Text>
+                    )}
+                  </View>
+                )}
+                {/* =============== Comentários =============== */}
               </>
             )}
           </View>
