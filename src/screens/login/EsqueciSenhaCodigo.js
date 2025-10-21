@@ -23,7 +23,8 @@ export default function EsqueciSenhaCodigo({ route, navigation }) {
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState({ visible: false, type: "info", title: "", message: "" });
 
-  const showError = (m, t="Não foi possível alterar") => setModal({ visible: true, type: "error", title: t, message: m });
+  const showError = (m, t = "Não foi possível alterar") =>
+    setModal({ visible: true, type: "error", title: t, message: m });
 
   const handleChangeDigit = (idx, val) => {
     const only = (val || "").replace(/\D/g, "").slice(0, 1);
@@ -37,27 +38,34 @@ export default function EsqueciSenhaCodigo({ route, navigation }) {
   const codigo = digits.join("");
 
   const handleConfirmar = async () => {
+    console.log("🔵 [ESQ-COD] confirmar", { email, codigoLen: codigo.length });
+
     if (!email) {
+      console.log("🟠 [ESQ-COD] email ausente");
       showError("E-mail não encontrado. Volte e preencha o e-mail.", "Atenção");
       return;
     }
     if (codigo.length !== 6) {
+      console.log("🟠 [ESQ-COD] código inválido:", codigo);
       showError("Digite o código de 6 dígitos.", "Atenção");
       return;
     }
     if (!senha || senha.length < 6) {
+      console.log("🟠 [ESQ-COD] senha curta");
       showError("A nova senha deve ter no mínimo 6 caracteres.", "Atenção");
       return;
     }
     if (senha !== confirma) {
+      console.log("🟠 [ESQ-COD] senhas diferentes");
       showError("As senhas não coincidem.", "Atenção");
       return;
     }
 
     try {
       setLoading(true);
+      console.log("📤 [ESQ-COD] chamando confirmarCodigoENovaSenha", { email, codigo, novaSenhaLen: senha.length });
       await confirmarCodigoENovaSenha({ email, codigo, novaSenha: senha });
-      setLoading(false);
+      console.log("✅ [ESQ-COD] senha alterada OK");
       setModal({
         visible: true,
         type: "success",
@@ -65,9 +73,15 @@ export default function EsqueciSenhaCodigo({ route, navigation }) {
         message: "Faça login novamente com sua nova senha.",
       });
     } catch (err) {
-      setLoading(false);
       const msg = formatApiError(err, "recovery-confirm");
+      console.log("❌ [ESQ-COD] erro ao confirmar:", {
+        message: err?.message,
+        status: err?.status,
+        details: err,
+      });
       showError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 

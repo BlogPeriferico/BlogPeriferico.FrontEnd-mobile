@@ -14,19 +14,26 @@ export default function EsqueciSenhaEmail({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState({ visible: false, type: "info", title: "", message: "" });
 
-  const validarEmail = (e) => /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/i.test(e?.trim());
-  const showError = (m, t="Não foi possível enviar") => setModal({ visible: true, type: "error", title: t, message: m });
+  const validarEmail = (e) => /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/i.test(String(e || "").trim());
+  const showError = (m, t = "Não foi possível enviar") =>
+    setModal({ visible: true, type: "error", title: t, message: m });
 
   const handleEnviar = async () => {
-    const emailTrim = email.trim();
+    const emailTrim = String(email).trim();
+    console.log("🔵 [ESQ-EMAIL] submit com:", emailTrim);
+
     if (!validarEmail(emailTrim)) {
+      console.log("🟠 [ESQ-EMAIL] e-mail inválido");
       showError("Digite um e-mail válido.", "Atenção");
       return;
     }
+
     try {
       setLoading(true);
+      console.log("📤 [ESQ-EMAIL] chamando solicitarCodigo", { email: emailTrim });
       await solicitarCodigo({ email: emailTrim });
-      setLoading(false);
+      console.log("✅ [ESQ-EMAIL] código enviado OK");
+
       setModal({
         visible: true,
         type: "success",
@@ -34,9 +41,15 @@ export default function EsqueciSenhaEmail({ navigation }) {
         message: "Enviamos um código de 6 dígitos para o seu e-mail.",
       });
     } catch (err) {
-      setLoading(false);
       const msg = formatApiError(err, "recovery-send");
+      console.log("❌ [ESQ-EMAIL] erro ao solicitar código:", {
+        message: err?.message,
+        status: err?.status,
+        details: err,
+      });
       showError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,7 +104,7 @@ export default function EsqueciSenhaEmail({ navigation }) {
         onPrimary={() => {
           setModal((m) => ({ ...m, visible: false }));
           if (modal.type === "success") {
-            navigation.navigate("EsqueciSenhaCodigo", { email: email.trim() });
+            navigation.navigate("EsqueciSenhaCodigo", { email: String(email).trim() });
           }
         }}
         onRequestClose={() => setModal((m) => ({ ...m, visible: false }))}
