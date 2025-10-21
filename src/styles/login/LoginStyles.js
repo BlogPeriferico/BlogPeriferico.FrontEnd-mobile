@@ -1,4 +1,5 @@
-import { StyleSheet, Platform } from "react-native";
+// src/styles/login/LoginStyles.js
+import { StyleSheet, Platform } from "react-native"; 
 
 export const styles = StyleSheet.create({
   background: {
@@ -56,6 +57,31 @@ export const styles = StyleSheet.create({
     overflow: "hidden",
   },
 
+  // 🔴 BANNER DE ERRO (novo)
+  errorBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FEE2E2",     // vermelho claro
+    borderColor: "#FCA5A5",
+    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  errorDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 10,
+    backgroundColor: "#EF4444",
+    marginRight: 10,
+  },
+  errorBannerText: {
+    color: "#991B1B",
+    fontSize: 14,
+    flex: 1,
+  },
+
   // Inputs SEM sombras no Android (para não formar halo nas bordas)
   input: {
     height: 48,
@@ -70,9 +96,19 @@ export const styles = StyleSheet.create({
       android: { elevation: 0 }, 
     }),
   },
+
+  // 🔴 BORDA DE ERRO (você já tinha – deixei um pouco mais visível)
   inputErro: {
     borderWidth: 1.5,
-    borderColor: "#D93025",
+    borderColor: "#EF4444", // antes #D93025, pode manter se preferir
+  },
+
+  // 🔴 TEXTO DE AJUDA (novo)
+  helperError: {
+    color: "#DC2626",
+    fontSize: 12,
+    marginTop: 6,
+    marginLeft: 2,
   },
 
   senhaContainer: {
@@ -156,7 +192,7 @@ export const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
 
-  // Visitante: sem sombra no Android (tem só a borda branca)
+  // Visitante
   visitorButton: {
     height: 52,
     borderRadius: 12,

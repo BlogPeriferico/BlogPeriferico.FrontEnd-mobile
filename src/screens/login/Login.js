@@ -1,3 +1,4 @@
+// src/screens/login/Login.js
 import React, { useEffect, useState } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, ImageBackground,
@@ -73,15 +74,16 @@ export default function Login({ navigation, route }) {
         await AsyncStorage.removeItem(STORAGE_KEYS.EMAIL);
       }
 
-      // ✅ Ir para as tabs (root) via ref global
-      resetToMain(); // abre na aba inicial (NoticiasTab)
-
-      // 👉 Para abrir direto na aba de Doações:
-      // resetToMain({ screen: "DoacoesTab", params: { screen: "DoacoesHome" } });
+      resetToMain(); // sucesso
 
     } catch (error) {
       const msg = formatApiError(error, "login");
-      showError(msg);
+      if (error?.status === 401 || error?.code === "INVALID_CREDENTIALS") {
+        setCampoInvalido({ email: true, senha: true });
+        showError(msg); // “Não foi possível entrar. E-mail ou senha inválidos.”
+      } else {
+        showError(msg);
+      }
     } finally {
       setAutenticando(false);
     }
