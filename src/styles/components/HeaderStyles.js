@@ -2,7 +2,6 @@ import { StyleSheet, Dimensions, StatusBar, Platform } from "react-native";
 const { width, height } = Dimensions.get("window");
 
 export const styles = StyleSheet.create({
-  // fundo branco por trás da status bar
   statusbarBackground: {
     backgroundColor: "#fff",
   },

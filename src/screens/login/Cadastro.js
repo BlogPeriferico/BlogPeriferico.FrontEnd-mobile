@@ -147,23 +147,7 @@ export default function Cadastro({ navigation }) {
               )}
             </LinearGradient>
           </TouchableOpacity>
-
-          {/* OU */}
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>Ou</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          {/* Visitante */}
-          <TouchableOpacity
-            style={styles.visitorButton}
-            onPress={() => navigation.replace("Noticias")}
-            disabled={loading}
-          >
-            <Text style={styles.visitorText}>Entrar como visitante</Text>
-          </TouchableOpacity>
-
+        
           {/* Ir para login */}
           <View style={styles.registroContainer}>
             <Text style={styles.registroTexto}>Já tem uma conta? </Text>

@@ -5,6 +5,8 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { resetToMain } from "../../navigation/navigationRef";
+
 import CloseEye from "../../assets/svgs/Close_Eye.svg";
 import OpenEye from "../../assets/svgs/Open_Eye.svg";
 import { styles } from "../../styles/login/LoginStyles";
@@ -23,10 +25,10 @@ export default function Login({ navigation, route }) {
   const [lembrar, setLembrar] = useState(false);
   const [campoInvalido, setCampoInvalido] = useState({ email: false, senha: false });
   const [modal, setModal] = useState({ visible: false, type: "info", title: "", message: "" });
+  const [autenticando, setAutenticando] = useState(false);
 
   const alternarVisibilidadeSenha = () => setMostrarSenha((v) => !v);
-  const validarEmail = (e) => /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(e);
-
+  const validarEmail = (e) => /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(String(e).toLowerCase());
   const showError = (message, title = "Não foi possível entrar") =>
     setModal({ visible: true, type: "error", title, message });
 
@@ -45,32 +47,43 @@ export default function Login({ navigation, route }) {
   }, []);
 
   const handleLogin = async () => {
-    if (!email || !senha) {
-      setCampoInvalido({ email: !email, senha: !senha });
+    const emailTrim = String(email).trim();
+    if (autenticando) return;
+
+    if (!emailTrim || !senha) {
+      setCampoInvalido({ email: !emailTrim, senha: !senha });
       showError("Preencha todos os campos!");
       return;
     }
-    if (!validarEmail(email)) {
+    if (!validarEmail(emailTrim)) {
       setCampoInvalido({ email: true, senha: false });
       showError("Digite um e-mail válido!");
       return;
     }
 
     try {
-      await login({ email, senha });
+      setAutenticando(true);
+      await login({ email: emailTrim, senha });
 
       if (lembrar) {
         await AsyncStorage.setItem(STORAGE_KEYS.LEMBRAR, "true");
-        await AsyncStorage.setItem(STORAGE_KEYS.EMAIL, email);
+        await AsyncStorage.setItem(STORAGE_KEYS.EMAIL, emailTrim);
       } else {
         await AsyncStorage.removeItem(STORAGE_KEYS.LEMBRAR);
         await AsyncStorage.removeItem(STORAGE_KEYS.EMAIL);
       }
 
-      navigation.replace("Noticias");
+      // ✅ Ir para as tabs (root) via ref global
+      resetToMain(); // abre na aba inicial (NoticiasTab)
+
+      // 👉 Para abrir direto na aba de Doações:
+      // resetToMain({ screen: "DoacoesTab", params: { screen: "DoacoesHome" } });
+
     } catch (error) {
       const msg = formatApiError(error, "login");
       showError(msg);
+    } finally {
+      setAutenticando(false);
     }
   };
 
@@ -98,6 +111,8 @@ export default function Login({ navigation, route }) {
             }}
             keyboardType="email-address"
             autoCapitalize="none"
+            autoCorrect={false}
+            textContentType="emailAddress"
           />
 
           {/* Senha */}
@@ -116,8 +131,9 @@ export default function Login({ navigation, route }) {
               autoCapitalize="none"
               returnKeyType="done"
               onSubmitEditing={handleLogin}
+              textContentType="password"
             />
-            <TouchableOpacity onPress={alternarVisibilidadeSenha}>
+            <TouchableOpacity onPress={alternarVisibilidadeSenha} accessibilityRole="button">
               {mostrarSenha ? <OpenEye width={24} height={24} /> : <CloseEye width={24} height={24} />}
             </TouchableOpacity>
           </View>
@@ -141,33 +157,18 @@ export default function Login({ navigation, route }) {
           </View>
 
           {/* Ação */}
-          <TouchableOpacity activeOpacity={0.9} onPress={handleLogin}>
+          <TouchableOpacity activeOpacity={0.9} onPress={handleLogin} disabled={autenticando}>
             <LinearGradient
               colors={["#9B9B9B", "#6F6F6F"]}
               start={{ x: 0.5, y: 0 }}
               end={{ x: 0.5, y: 1 }}
-              style={styles.botaoGradiente}
+              style={[styles.botaoGradiente, autenticando && { opacity: 0.7 }]}
             >
-              <Text style={styles.botaoTexto}>Login</Text>
+              <Text style={styles.botaoTexto}>{autenticando ? "Entrando..." : "Login"}</Text>
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* OU */}
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>Ou</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          {/* Visitante */}
-          <TouchableOpacity
-            style={styles.visitorButton}
-            onPress={() => navigation.replace("Noticias")}
-          >
-            <Text style={styles.visitorText}>Entrar como visitante</Text>
-          </TouchableOpacity>
-
-          {/* Ir para cadastro */}
+          {/* Cadastro */}
           <View style={styles.registroContainer}>
             <Text style={styles.registroTexto}>Não tem uma conta ainda? </Text>
             <TouchableOpacity onPress={() => navigation.navigate("Cadastro")}>
@@ -179,7 +180,6 @@ export default function Login({ navigation, route }) {
 
       <Text style={styles.footer}>Logue para continuar</Text>
 
-      {/* Modal bonitinho */}
       <StatusModal
         visible={modal.visible}
         type={modal.type}

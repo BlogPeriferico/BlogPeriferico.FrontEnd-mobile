@@ -9,14 +9,13 @@ import {
   RefreshControl,
   Dimensions,
 } from "react-native";
-
 import Header from "../../components/Header";
 import { useRegionTheme } from "../../utils/regionTheme";
-import { getTodasDoacoes, paginaDoacoes } from "../../services/doacoes";
+import { getTodasVagas, paginaVagas } from "../../services/vagas";
 import AddIcon from "../../assets/svgs/Add.svg";
-import { styles as s } from "../../styles/doacao/DoacoesStyles";
-import DoacaoCard from "../../components/doacao/DoacaoCard";
-import DoacaoCarrossel from "../../components/doacao/DoacaoCarrossel"; 
+import { styles as s } from "../../styles/vaga/VagasStyles";
+import VagaCard from "../../components/vaga/VagaCard";
+import DoacaoCarrossel from "../../components/doacao/DoacaoCarrossel";
 
 function dedupeById(arr) {
   const seen = new Set();
@@ -36,25 +35,24 @@ const H_PADDING = 16;
 const GUTTER = 12;
 const CARD_W = (SCREEN_W - H_PADDING * 2 - GUTTER) / 2;
 
-export default function Doacao({ navigation }) {
+export default function Vagas({ navigation }) {
   const { regiao, colors } = useRegionTheme();
 
   const [listaCompleta, setListaCompleta] = useState([]);
   const [itens, setItens] = useState([]);
   const [pageState, setPageState] = useState({ page: 1, pageSize: 6, hasMore: true });
-
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const carregar = useCallback(async () => {
-    const data = await getTodasDoacoes();
+    const data = await getTodasVagas();
     const filtradas = (Array.isArray(data) ? data : []).filter(
       (d) => d.zona?.toLowerCase?.() === regiao?.toLowerCase?.()
     );
     const base = dedupeById(filtradas);
     setListaCompleta(base);
-    const pg = paginaDoacoes(base, { page: 1, pageSize: 6 });
+    const pg = paginaVagas(base, { page: 1, pageSize: 6 });
     setItens(pg.items);
     setPageState({ page: 1, pageSize: 6, hasMore: pg.hasMore });
   }, [regiao]);
@@ -64,8 +62,8 @@ export default function Doacao({ navigation }) {
       setLoading(true);
       await carregar();
     } catch (e) {
-      console.log("❌ carregar doações:", e?.message || e);
-      Alert.alert("Erro", "Não foi possível carregar as doações.");
+      console.log("❌ carregar vagas:", e?.message || e);
+      Alert.alert("Erro", "Não foi possível carregar as vagas.");
     } finally {
       setLoading(false);
     }
@@ -80,8 +78,8 @@ export default function Doacao({ navigation }) {
       setRefreshing(true);
       await carregar();
     } catch (e) {
-      console.log("❌ refresh doações:", e?.message || e);
-      Alert.alert("Erro", "Falha ao atualizar as doações.");
+      console.log("❌ refresh vagas:", e?.message || e);
+      Alert.alert("Erro", "Falha ao atualizar as vagas.");
     } finally {
       setRefreshing(false);
     }
@@ -92,7 +90,7 @@ export default function Doacao({ navigation }) {
     try {
       setLoadingMore(true);
       const nextPage = pageState.page + 1;
-      const pg = paginaDoacoes(listaCompleta, { page: nextPage, pageSize: 6 });
+      const pg = paginaVagas(listaCompleta, { page: nextPage, pageSize: 6 });
       setItens((old) => dedupeById([...old, ...pg.items]));
       setPageState({ page: nextPage, pageSize: 6, hasMore: pg.hasMore });
     } finally {
@@ -100,13 +98,12 @@ export default function Doacao({ navigation }) {
     }
   };
 
-  const goNovaDoacao = () => navigation.navigate("NovaDoacao");
-  const goDetalhe = (d) => navigation.navigate("DetalheDoacao", { id: d.id, doacao: d });
+  const goNovaVaga = () => navigation.navigate("NovaVaga");
+  const goDetalhe = (v) => navigation.navigate("DetalheVaga", { id: v.id, vaga: v });
 
   return (
     <View style={s.container}>
       <Header />
-
       <ScrollView
         contentContainerStyle={[s.scroll, { paddingHorizontal: H_PADDING, paddingTop: 12 }]}
         refreshControl={
@@ -118,17 +115,13 @@ export default function Doacao({ navigation }) {
           />
         }
       >
-        {/* Carrossel fixo (IDs 15,16,17) */}
         <DoacaoCarrossel navigation={navigation} containerStyle={{ marginBottom: 18 }} />
 
-        {/* Título + botão adicionar */}
         <View style={s.headerRow}>
-          <Text style={[s.tituloSecao, { color: colors.primary }]}>
-            Seleções De Doações
-          </Text>
+          <Text style={[s.tituloSecao, { color: colors.primary }]}>Oportunidades de Vagas</Text>
           <TouchableOpacity
-            onPress={goNovaDoacao}
-            accessibilityLabel="Adicionar doação"
+            onPress={goNovaVaga}
+            accessibilityLabel="Adicionar vaga"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             style={[s.addBtn, { borderColor: colors.primary }]}
           >
@@ -136,24 +129,23 @@ export default function Doacao({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Lista / Grid */}
         {loading ? (
           <ActivityIndicator size="large" color={colors.primary} />
         ) : itens.length === 0 ? (
           <Text style={{ textAlign: "center", color: "#6B7280", marginTop: 40 }}>
-            Nenhuma doação encontrada nesta região.
+            Nenhuma vaga disponível nesta região.
           </Text>
         ) : (
           <>
             <View style={s.grid}>
-              {itens.map((d, index) => {
+              {itens.map((v, index) => {
                 const isLeftCol = index % 2 === 0;
                 return (
-                  <DoacaoCard
-                    key={`${d.id}-${index}`}
-                    item={d}
+                  <VagaCard
+                    key={`${v.id}-${index}`}
+                    item={v}
                     regiao={regiao}
-                    onPress={() => goDetalhe(d)}
+                    onPress={() => goDetalhe(v)}
                     style={{
                       width: CARD_W,
                       marginRight: isLeftCol ? GUTTER : 0,
@@ -163,7 +155,6 @@ export default function Doacao({ navigation }) {
               })}
             </View>
 
-            {/* Botão VER MAIS */}
             {pageState.hasMore && (
               <TouchableOpacity
                 onPress={handleVerMais}

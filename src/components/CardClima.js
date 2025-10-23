@@ -8,11 +8,11 @@ import { Ionicons } from "@expo/vector-icons";
 const API_KEY = "56fd2180ff9c0389b8ebc9c566b4d563";
 
 const zonas = Object.entries(zonasClima).map(([nome, dados]) => ({
-  nome: `São Paulo, ${nome}`, // exibe igual ao print
+  nome: `São Paulo, ${nome}`, 
   bairro: dados.bairro,
   lat: dados.lat,
   lon: dados.lon,
-  imagem: `https://blogperiferico.blob.core.windows.net/zonas/zona_${nome.toLowerCase()}.png`,
+  imagem: `https://blogperic0.blob.core.windows.net/zonas/zona_${nome.toLowerCase()}.png`,
 }));
 
 export default function CardClima() {
@@ -49,7 +49,7 @@ export default function CardClima() {
     const d = new Date(timestamp * 1000);
     const weekday = d
       .toLocaleDateString("pt-BR", { weekday: "long" })
-      .replace(/^\w/, (c) => c.toUpperCase()); // Monday capitalizado
+      .replace(/^\w/, (c) => c.toUpperCase()); 
     const data = d.toLocaleDateString("pt-BR");
     return { weekday, data };
   };
@@ -60,16 +60,13 @@ export default function CardClima() {
     <View style={styles.card}>
       <Image source={{ uri: zonaAtual.imagem }} style={styles.imagem} />
 
-      {/* escurece a imagem para dar contraste */}
       <View style={styles.dim} />
 
-      {/* localização no topo */}
       <View style={styles.localTop}>
         <Ionicons name="location-outline" size={20} color="#EAF6FF" style={{ marginRight: 6 }} />
         <Text style={styles.localizacao}>{zonaAtual.nome}</Text>
       </View>
 
-      {/* bloco central */}
       {carregando ? (
         <ActivityIndicator size="large" color="#fff" style={styles.loader} />
       ) : clima ? (
@@ -86,7 +83,6 @@ export default function CardClima() {
         <Text style={styles.erro}>Erro ao carregar clima</Text>
       )}
 
-      {/* setas laterais */}
       <TouchableOpacity style={[styles.navBtn, styles.esquerda]} onPress={anterior} activeOpacity={0.8}>
         <Ionicons name="chevron-back" size={28} color="#fff" />
       </TouchableOpacity>

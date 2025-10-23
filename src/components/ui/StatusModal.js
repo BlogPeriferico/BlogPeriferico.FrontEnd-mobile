@@ -3,9 +3,9 @@ import { Modal, View, Text, TouchableOpacity, Pressable } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 export default function StatusModal({
-  visible,
-  type = "info",            // 'success' | 'error' | 'info'
-  title = "",
+  visible = false,
+  type = "info",
+  title = "",                 // ✅ agora recebido por props (com fallback)
   message = "",
   primaryText = "OK",
   onPrimary = () => {},
@@ -13,11 +13,12 @@ export default function StatusModal({
   onSecondary,
   onRequestClose = () => {},
 }) {
-  const palette = {
+  const PALETTES = {
     success: { bg: ["#37D17F", "#2FA966"], ring: "#CFF6E0", text: "#103E2A", icon: "✅" },
     error:   { bg: ["#F06E6E", "#B83B3B"], ring: "#FAD7D7", text: "#3E1010", icon: "❌" },
     info:    { bg: ["#9B9B9B", "#6F6F6F"], ring: "#E7E7E7", text: "#1E1E1E", icon: "ℹ️" },
-  }[type] || {};
+  };
+  const palette = PALETTES[type] || PALETTES.info; // ✅ fallback seguro
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onRequestClose}>
@@ -48,14 +49,15 @@ export default function StatusModal({
             >
               <Text style={{ fontSize: 34 }}>{palette.icon}</Text>
             </View>
-            {!!title && (
+
+            {Boolean(title) && (
               <Text style={{ fontSize: 20, fontWeight: "700", color: palette.text, textAlign: "center" }}>
                 {title}
               </Text>
             )}
           </View>
 
-          {!!message && (
+          {Boolean(message) && (
             <Text style={{ color: "#4A4A4A", textAlign: "center", lineHeight: 20, marginBottom: 16 }}>
               {message}
             </Text>
@@ -64,7 +66,7 @@ export default function StatusModal({
           <View style={{ gap: 10 }}>
             <TouchableOpacity activeOpacity={0.9} onPress={onPrimary}>
               <LinearGradient
-                colors={palette.bg}
+                colors={palette.bg}                      // ✅ sempre array válido
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
                 style={{ paddingVertical: 12, borderRadius: 12, alignItems: "center" }}

@@ -30,7 +30,6 @@ export const styles = StyleSheet.create({
     marginTop: 6,
   },
 
-  // Wrapper do card: sombra apenas no iOS (no Android 0 para não criar halo)
   cardWrapper: {
     width: "90%",
     maxWidth: 370,
@@ -44,12 +43,11 @@ export const styles = StyleSheet.create({
         shadowRadius: 18,
       },
       android: {
-        elevation: 0, // << zera sombra no Android para remover a borda interna
+        elevation: 0, 
       },
     }),
   },
 
-  // Card sem sombra/borda; translúcido
   card: {
     borderRadius: 20,
     paddingHorizontal: 20,
@@ -69,7 +67,7 @@ export const styles = StyleSheet.create({
     marginTop: 10,
     ...Platform.select({
       ios: { shadowColor: "#000", shadowOpacity: 0.05, shadowOffset: { width: 0, height: 2 }, shadowRadius: 5 },
-      android: { elevation: 0 }, // <<
+      android: { elevation: 0 }, 
     }),
   },
   inputErro: {
@@ -89,7 +87,7 @@ export const styles = StyleSheet.create({
     marginTop: 10,
     ...Platform.select({
       ios: { shadowColor: "#000", shadowOpacity: 0.05, shadowOffset: { width: 0, height: 2 }, shadowRadius: 5 },
-      android: { elevation: 0 }, // <<
+      android: { elevation: 0 }, 
     }),
   },
   inputSenha: {
@@ -127,7 +125,6 @@ export const styles = StyleSheet.create({
   checkboxTexto: { color: "#9AA3AF", fontSize: 14 },
   link: { color: "#3A74FF", fontSize: 13 },
 
-  // Botão Login: sem sombra no Android
   botaoGradiente: {
     height: 52,
     borderRadius: 12,
@@ -136,12 +133,11 @@ export const styles = StyleSheet.create({
     marginTop: 14,
     ...Platform.select({
       ios: { shadowColor: "#000", shadowOpacity: 0.15, shadowOffset: { width: 0, height: 6 }, shadowRadius: 10 },
-      android: { elevation: 0 }, // <<
+      android: { elevation: 0 }, 
     }),
   },
   botaoTexto: { color: "#fff", fontSize: 16, fontWeight: "600" },
 
-  // Divider OU
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",

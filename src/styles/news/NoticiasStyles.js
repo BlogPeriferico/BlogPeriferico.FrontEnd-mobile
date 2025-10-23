@@ -3,100 +3,148 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F4F6F8",
   },
 
-  /* ===== Área de Climatização ===== */
-  areaClimaCard: {
+  scroll: {
+    paddingBottom: 24,
+  },
+
+  /* ----- Box de climatização ----- */
+  climatizacaoBox: {
+    marginHorizontal: 12,
+    marginTop: 12,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    padding: 12,
+  },
+  tituloClimatizacao: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 6,
+  },
+  textoClimatizacao: {
+    fontSize: 13,
+    color: "#6B7280",
+    marginBottom: 6,
+  },
+  link: {
+    fontSize: 13,
+    fontWeight: "700",
+  },
+
+  /* ----- Header da sessão + botão adicionar ----- */
+  newsHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginHorizontal: 12,
+    marginTop: 14,
+    marginBottom: 8,
+  },
+  newsHeaderTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  addBtn: {
+    width: 28,
+    height: 28,
+    borderWidth: 1.5,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFF",
+  },
+
+  /* ----- Card grande (última notícia) ----- */
+  leadCard: {
+    marginHorizontal: 12,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  leadImage: {
+    width: "100%",
+    height: 190,
+    resizeMode: "cover",
+  },
+  leadBody: {
+    padding: 16,
+  },
+  leadTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 8,
+  },
+  leadSubtitle: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: "#374151",
+  },
+
+  /* ----- Cards pequenos (layout Figma) ----- */
+  itemCard: {
     marginHorizontal: 12,
     marginTop: 10,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.08)", // borda suave como no mock
+    borderColor: "#E5E7EB",
+    backgroundColor: "#FFFFFF",
+    flexDirection: "row",
+    alignItems: "stretch", // imagem ocupa altura total
+    minHeight: 92,
   },
-  areaClimaTitulo: {
-    textAlign: "center",
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#0E1B2A",
-    marginBottom: 10,
+  itemLeft: {
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    justifyContent: "center",
   },
-  areaClimaDesc: {
-    textAlign: "left",
+  itemTitle: {
     fontSize: 16,
-    lineHeight: 22,
-    color: "#8B95A5",
+    fontWeight: "600",
+    color: "#111827",
     marginBottom: 12,
   },
-  areaClimaLink: {
-    fontSize: 16,
-    color: "#0A3E66",
-    fontWeight: "700",
-  },
-
-  /* ===== Seção de Notícias / Ícones ===== */
-  selecaoNoticias: {
-    marginTop: 14,
-    paddingHorizontal: 16,
-  },
-  tituloSecao: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 8,
-    color: "#0E1B2A",
-  },
-  iconesLinha: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 8,
-  },
-
-  /* ===== Lista de notícias ===== */
-  cardNoticia: {
+  itemMetaRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#EDEEF0",
-    gap: 10,
   },
-  imagemNoticia: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    backgroundColor: "#F2F2F2",
-  },
-  infoNoticia: {
-    flex: 1,
-  },
-  tituloNoticia: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#0E1B2A",
-    marginBottom: 4,
-  },
-  subInfo: {
+  itemRegion: {
     fontSize: 12,
-    color: "#7A869A",
+    color: "#94A3B8",
+    textTransform: "uppercase",
+    marginRight: 24,
+  },
+  itemDate: {
+    fontSize: 12,
+    color: "#94A3B8",
+  },
+  itemThumbRight: {
+    width: 116,          // largura fixa para ficar “quadradinho”
+    height: "100%",      // ocupa toda a altura do card
+    resizeMode: "cover",
+  },
+  itemThumbRightFallback: {
+    width: 116,
+    height: "100%",
+    backgroundColor: "#E5E7EB",
   },
 
-  /* ===== Botão VER MAIS ===== */
-  botaoMais: {
-    backgroundColor: "#F3F5F7",
-    paddingVertical: 12,
-    marginHorizontal: 16,
-    marginVertical: 16,
+  verMaisBtn: {
+    marginHorizontal: 12,
+    marginTop: 14,
+    height: 44,
     alignItems: "center",
-    borderRadius: 8,
+    justifyContent: "center",
   },
-  textoMais: {
-    fontWeight: "bold",
-    color: "#0A3E66",
-    letterSpacing: 0.5,
+  verMaisLabel: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    letterSpacing: 0.6,
+    fontSize: 13,
   },
 });

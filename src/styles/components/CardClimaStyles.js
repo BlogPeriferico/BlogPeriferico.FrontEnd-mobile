@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   card: {
-    height: 240, // menor altura
+    height: 240, 
     overflow: "hidden",
     marginTop: 6,
     position: "relative",
@@ -27,23 +27,23 @@ export const styles = StyleSheet.create({
   localizacao: {
     color: "#fff",
     fontWeight: "600",
-    fontSize: 14, // menor
+    fontSize: 14, 
   },
 
   // conteúdo central
   centerContent: {
     position: "absolute",
     alignSelf: "center",
-    top: "40%", // centraliza verticalmente
+    top: "40%", 
     alignItems: "center",
   },
   icone: {
     width: 40,
-    height: 40, // ícone menor
+    height: 40, 
     marginBottom: 2,
   },
   temp: {
-    fontSize: 26, // temperatura menor
+    fontSize: 26, 
     color: "#fff",
     fontWeight: "700",
   },
