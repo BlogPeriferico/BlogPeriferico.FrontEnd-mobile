@@ -24,14 +24,13 @@ import { navigationRef /*, resetToMain*/ } from "../navigation/navigationRef"; /
 const { width } = Dimensions.get("window");
 
 // 🔎 mapeia telas de detalhe -> tela de lista alvo
-// ajuste os nomes conforme suas rotas reais
 const ROUTE_SEARCH_TARGETS = {
   DetalheNoticia: "NoticiasHome",
   DetalheDoacao: "DoacoesHome",
   DetalheVaga: "VagasHome",
 };
 
-// pega nome da rota atual (sem depender de helper externo)
+// pega nome da rota atual
 function getActiveRouteName() {
   try {
     if (!navigationRef?.isReady?.()) return null;
@@ -51,16 +50,13 @@ function dispatchSearch(query) {
   const target =
     ROUTE_SEARCH_TARGETS[current] || // se é detalhe, manda pra lista-mãe
     current ||                       // se já está numa lista, manda pra ela
-    "NoticiasHome";                  // fallback (ajuste pro melhor default)
+    "NoticiasHome";                  // fallback
 
-  // canal específico por tela
   const channel = `search:${target}`;
   DeviceEventEmitter.emit(channel, { q, from: current });
-
-  // (opcional) também um global, caso alguma tela queira ouvir tudo
   DeviceEventEmitter.emit("app:search", { q, from: current });
 
-  // (opcional) se quiser garantir que a Main/aba esteja ativa, descomente:
+  // (opcional) resetar aba:
   // try { resetToMain({ target }); } catch {}
 
   return true;
@@ -191,7 +187,7 @@ export default function Header() {
             </View>
           </TouchableOpacity>
 
-          {/* Título + busca */}
+          {/* Título + busca (originais) */}
           <View style={styles.centerArea}>
             <Animated.Text style={[styles.titulo, { opacity: tituloOpacity, color: colors.primary }]}>
               BlogPeriferico
@@ -217,7 +213,7 @@ export default function Header() {
             </Animated.View>
           </View>
 
-          {/* Lupa */}
+          {/* Lupa (original) */}
           <TouchableOpacity activeOpacity={0.9} onPressIn={onLupaPressIn} onPressOut={onLupaPressOut}>
             <Animated.View style={{ transform: [{ rotate: lupaRotate }, { scale: lupaScale }] }}>
               <Ionicons name="search" size={24} color={colors.primary} />
@@ -240,27 +236,32 @@ export default function Header() {
               <Text style={styles.modalItem}>Perfil</Text>
               <Text style={styles.modalItem}>Notícias</Text>
 
-              <TouchableOpacity onPress={abrirSeletorRegiao} activeOpacity={0.85} style={{ marginTop: 8 }}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    borderWidth: 1,
-                    borderColor: "#2C2C2C",
-                    backgroundColor: "#1A1A1A",
-                    paddingVertical: 12,
-                    paddingHorizontal: 10,
-                  }}
-                >
-                  <Text style={{ color: "#fff", fontWeight: "600" }}>Escolher região</Text>
-                  <View style={{ paddingHorizontal: 8, paddingVertical: 4, backgroundColor: "#2B2B2B" }}>
-                    <Text style={{ color: "#CFCFCF", fontSize: 12 }}>
-                      {String(regiao || "").replace("noroeste2", "noroeste (2)")}
-                    </Text>
+              {/* ——— Somente o conteúdo do menu foi estilizado abaixo ——— */}
+              <Text style={styles.drawerSectionTitle}>Localização</Text>
+
+              <TouchableOpacity onPress={abrirSeletorRegiao} activeOpacity={0.9} style={{ marginTop: 8 }}>
+                <View style={styles.drawerRegionButton}>
+                  <View style={styles.drawerRegionLeft}>
+                    <View style={styles.drawerRegionIconWrap}>
+                      <Ionicons name="map-outline" size={18} color="#3949AB" />
+                    </View>
+                    <Text style={styles.drawerRegionLabel}>Escolher região</Text>
+                  </View>
+
+                  <View style={styles.drawerRegionRight}>
+                    <View style={styles.drawerRegionChip}>
+                      <Text style={styles.drawerRegionChipText}>
+                        {String(regiao || "")
+                          .replace("noroeste2", "noroeste (2)")
+                          .replace(/^./, (c) => c.toUpperCase())}
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color="#9CA3AF" style={styles.drawerChevron} />
                   </View>
                 </View>
               </TouchableOpacity>
+
+              <View style={styles.drawerDivider} />
 
               <Text style={styles.modalItem}>Sair</Text>
             </Animated.View>

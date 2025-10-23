@@ -1,3 +1,4 @@
+// src/routes/BottomTabs.jsx
 import React from "react";
 import { Platform, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -5,7 +6,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import NoticiasStack from "./NoticiasStack";
 import DoacaoStack from "./DoacaoStack";
-import VagasStack from "./VagasStack"; // ⬅️ usa o stack de Vagas
+import VagasStack from "./VagasStack";
+import SobreStack from "./SobreStack";
 
 import AchadinhosScreen from "../screens/achadinhos/Achadinhos";
 
@@ -13,6 +15,7 @@ import IconNews from "../assets/svgs/tab/Jornal.svg";
 import IconHandHeart from "../assets/svgs/tab/MaoCoracao.svg";
 import IconStore from "../assets/svgs/tab/Loja.svg";
 import IconMegaphone from "../assets/svgs/tab/Megafone.svg";
+import IconQuestion from "../assets/svgs/tab/Interrogacao.svg"; 
 
 const Tab = createBottomTabNavigator();
 
@@ -22,7 +25,6 @@ export default function BottomTabs() {
   const ACTIVE = "#111";
   const INACTIVE = "#7C7C7C";
   const BG = "#fff";
-
   const baseHeight = 58;
 
   const SHADOW =
@@ -86,10 +88,21 @@ export default function BottomTabs() {
 
       <Tab.Screen
         name="MaoAmigaTab"
-        component={VagasStack} // ⬅️ aqui agora é o STACK
+        component={VagasStack}
         options={{
           tabBarIcon: ({ focused }) => (
             <IconMegaphone width={28} height={28} color={focused ? ACTIVE : INACTIVE} />
+          ),
+        }}
+      />
+
+      {/* SOBRE */}
+      <Tab.Screen
+        name="SobreTab"
+        component={SobreStack}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <IconQuestion width={28} height={28} color={focused ? ACTIVE : INACTIVE} />
           ),
         }}
       />
