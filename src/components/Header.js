@@ -13,24 +13,27 @@ import {
   StatusBar,
   Platform,
   DeviceEventEmitter,
+  Alert,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "../styles/components/HeaderStyles";
 import RegionSelector from "../components/RegionSelector";
 import { useRegiao } from "../contexts/RegionContext";
 import { useRegionTheme } from "../utils/regionTheme";
-import { navigationRef /*, resetToMain*/ } from "../navigation/navigationRef"; // resetToMain opcional
+import { navigationRef } from "../navigation/navigationRef";
+import { TOKEN_KEY } from "../services/tokenStore"; // ← se existir no projeto
 
 const { width } = Dimensions.get("window");
+const dbg = (...a) => console.log("🧱[Header]", ...a);
 
-// 🔎 mapeia telas de detalhe -> tela de lista alvo
 const ROUTE_SEARCH_TARGETS = {
   DetalheNoticia: "NoticiasHome",
   DetalheDoacao: "DoacoesHome",
   DetalheVaga: "VagasHome",
+  DetalheVenda: "VendasHome",
 };
 
-// pega nome da rota atual
 function getActiveRouteName() {
   try {
     if (!navigationRef?.isReady?.()) return null;
@@ -41,24 +44,15 @@ function getActiveRouteName() {
   }
 }
 
-// 🚀 dispara a busca com base na rota atual
 function dispatchSearch(query) {
   const q = String(query || "").trim();
   if (!q) return false;
-
   const current = getActiveRouteName();
-  const target =
-    ROUTE_SEARCH_TARGETS[current] || // se é detalhe, manda pra lista-mãe
-    current ||                       // se já está numa lista, manda pra ela
-    "NoticiasHome";                  // fallback
-
+  const target = ROUTE_SEARCH_TARGETS[current] || current || "NoticiasHome";
   const channel = `search:${target}`;
+  dbg("dispatchSearch ->", { q, current, target, channel });
   DeviceEventEmitter.emit(channel, { q, from: current });
   DeviceEventEmitter.emit("app:search", { q, from: current });
-
-  // (opcional) resetar aba:
-  // try { resetToMain({ target }); } catch {}
-
   return true;
 }
 
@@ -80,6 +74,7 @@ export default function Header() {
   const inputRef = useRef(null);
 
   const abrirMenu = () => {
+    dbg("abrirMenu()");
     setMenuAberto(true);
     Animated.parallel([
       Animated.timing(menuAnim, { toValue: 1, duration: 280, easing: Easing.out(Easing.quad), useNativeDriver: false }),
@@ -89,6 +84,7 @@ export default function Header() {
   };
 
   const fecharMenu = (cb) => {
+    dbg("fecharMenu()");
     Animated.parallel([
       Animated.timing(menuAnim, { toValue: 0, duration: 260, easing: Easing.in(Easing.quad), useNativeDriver: false }),
       Animated.timing(slideAnim, { toValue: -width, duration: 300, easing: Easing.in(Easing.cubic), useNativeDriver: false }),
@@ -99,9 +95,11 @@ export default function Header() {
     });
   };
 
-  const toggleMenu = () => (menuAberto ? fecharMenu() : abrirMenu());
+  const toggleMenu = () => {
+    dbg("toggleMenu()", { aberto: menuAberto });
+    menuAberto ? fecharMenu() : abrirMenu();
+  };
 
-  // animações do ícone hambúrguer
   const topBar = {
     transform: [
       { translateY: menuAnim.interpolate({ inputRange: [0, 1], outputRange: [-6, 0] }) },
@@ -119,10 +117,11 @@ export default function Header() {
     ],
   };
 
-  // abrir/fechar barra de busca
   const toggleBusca = (abrirExplícito) => {
     const abrir = typeof abrirExplícito === "boolean" ? abrirExplícito : !buscando;
     if (abrir === buscando) return;
+
+    dbg("toggleBusca()", { abrir, buscando });
 
     if (abrir) setBuscando(true);
     Animated.timing(searchAnim, {
@@ -137,26 +136,25 @@ export default function Header() {
   };
 
   const doSearch = () => {
+    dbg("doSearch()", { query: busca });
     const ok = dispatchSearch(busca);
-    if (ok) {
-      // Se quiser fechar a barra após pesquisar:
-      // toggleBusca(false);
-      // inputRef.current?.blur();
-    }
+    dbg("doSearch result:", ok);
   };
 
   const limpar = () => {
+    dbg("limpar busca");
     setBusca("");
     inputRef.current?.clear();
     inputRef.current?.focus();
   };
 
-  // interação da lupa
-  const onLupaPressIn = () => Animated.timing(lupaPress, { toValue: 1, duration: 80, useNativeDriver: false }).start();
+  const onLupaPressIn = () =>
+    Animated.timing(lupaPress, { toValue: 1, duration: 80, useNativeDriver: false }).start();
+
   const onLupaPressOut = () =>
     Animated.timing(lupaPress, { toValue: 0, duration: 80, useNativeDriver: false }).start(() => {
-      if (buscando) doSearch();      // quando já está aberta, tocar na lupa busca
-      else toggleBusca(true);        // quando fechada, abre
+      if (buscando) doSearch();
+      else toggleBusca(true);
     });
 
   const searchWidth = searchAnim.interpolate({ inputRange: [0, 1], outputRange: [0, width - 120] });
@@ -164,8 +162,59 @@ export default function Header() {
   const lupaRotate = searchAnim.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "90deg"] });
   const lupaScale = lupaPress.interpolate({ inputRange: [0, 1], outputRange: [1, 0.9] });
 
-  const abrirSeletorRegiao = () => fecharMenu(() => setRegionVisible(true));
+  const abrirSeletorRegiao = () => {
+    dbg("abrirSeletorRegiao()");
+    fecharMenu(() => setRegionVisible(true));
+  };
+
   const showClear = useMemo(() => buscando && busca.length > 0, [buscando, busca]);
+
+  const go = (routeName) => {
+    try {
+      dbg("navigate ->", routeName);
+      navigationRef?.navigate?.(routeName);
+    } catch (e) {
+      dbg("ERRO navigate:", e?.message || e);
+    }
+  };
+
+  // ---- LOGOUT ----
+  const handleLogout = async () => {
+    try {
+      // fecha o menu antes de mexer na navegação
+      fecharMenu();
+
+      // limpa credenciais do app
+      const candidates = [
+        TOKEN_KEY || "auth_token", // preferencial se vier do tokenStore
+        "USER_ID_KEY",
+        "user_id",
+        "auth:token",
+      ];
+
+      await Promise.all(
+        candidates.map((k) =>
+          AsyncStorage.removeItem(k).catch(() => {})
+        )
+      );
+
+      // avisa o app (se alguém escutar)
+      DeviceEventEmitter.emit("auth:logout");
+
+      // feedback opcional
+      // Alert.alert("Sessão encerrada", "Você saiu da sua conta.");
+
+      // reseta navegação para Login
+      navigationRef?.reset?.({
+        index: 0,
+        routes: [{ name: "Login" }],
+      });
+    } catch (e) {
+      console.log("⚠️[Header] logout erro:", e?.message || e);
+      Alert.alert("Erro", "Não foi possível sair. Tente novamente.");
+    }
+  };
+  // ---- /LOGOUT ----
 
   return (
     <>
@@ -187,7 +236,7 @@ export default function Header() {
             </View>
           </TouchableOpacity>
 
-          {/* Título + busca (originais) */}
+          {/* Título + busca */}
           <View style={styles.centerArea}>
             <Animated.Text style={[styles.titulo, { opacity: tituloOpacity, color: colors.primary }]}>
               BlogPeriferico
@@ -203,17 +252,20 @@ export default function Header() {
                 style={styles.inputBusca}
                 returnKeyType="search"
                 blurOnSubmit
-                onSubmitEditing={doSearch}   // Enter dispara a busca
+                onSubmitEditing={doSearch}
               />
               {showClear && (
-                <TouchableOpacity onPress={limpar} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <TouchableOpacity
+                  onPress={limpar}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
                   <Ionicons name="close-circle" size={18} color="#9CA3AF" />
                 </TouchableOpacity>
               )}
             </Animated.View>
           </View>
 
-          {/* Lupa (original) */}
+          {/* Lupa */}
           <TouchableOpacity activeOpacity={0.9} onPressIn={onLupaPressIn} onPressOut={onLupaPressOut}>
             <Animated.View style={{ transform: [{ rotate: lupaRotate }, { scale: lupaScale }] }}>
               <Ionicons name="search" size={24} color={colors.primary} />
@@ -233,10 +285,28 @@ export default function Header() {
                 </View>
               </Pressable>
 
-              <Text style={styles.modalItem}>Perfil</Text>
-              <Text style={styles.modalItem}>Notícias</Text>
+              {/* Itens do menu com navegação */}
+              <TouchableOpacity onPress={() => fecharMenu(() => go("Perfil"))}>
+                <Text style={styles.modalItem}>Perfil</Text>
+              </TouchableOpacity>
 
-              {/* ——— Somente o conteúdo do menu foi estilizado abaixo ——— */}
+              <TouchableOpacity onPress={() => fecharMenu(() => go("NoticiasTab"))}>
+                <Text style={styles.modalItem}>Notícias</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => fecharMenu(() => go("DoacoesTab"))}>
+                <Text style={styles.modalItem}>Doações</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => fecharMenu(() => go("VendasTab"))}>
+                <Text style={styles.modalItem}>Vendas</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => fecharMenu(() => go("MaoAmigaTab"))}>
+                <Text style={styles.modalItem}>Vagas</Text>
+              </TouchableOpacity>
+
+              {/* Seção de região */}
               <Text style={styles.drawerSectionTitle}>Localização</Text>
 
               <TouchableOpacity onPress={abrirSeletorRegiao} activeOpacity={0.9} style={{ marginTop: 8 }}>
@@ -263,7 +333,10 @@ export default function Header() {
 
               <View style={styles.drawerDivider} />
 
-              <Text style={styles.modalItem}>Sair</Text>
+              {/* SAIR - deslogar */}
+              <TouchableOpacity onPress={handleLogout}>
+                <Text style={[styles.modalItem, { color: "#B00020" }]}>Sair</Text>
+              </TouchableOpacity>
             </Animated.View>
 
             <Animated.View style={[styles.modalOverlay, { opacity: overlayAnim }]}>

@@ -6,6 +6,7 @@ import Cadastro from "../screens/login/Cadastro";
 import EsqueciSenhaEmail from "../screens/login/EsqueciSenhaEmail";
 import EsqueciSenhaCodigo from "../screens/login/EsqueciSenhaCodigo";
 import BottomTabs from "./BottomTabs";
+import PerfilStack from "./PerfilStack"; // ⬅️ ADICIONE
 
 const Stack = createNativeStackNavigator();
 
@@ -17,6 +18,7 @@ export default function StackNavigator() {
       <Stack.Screen name="EsqueciSenhaEmail" component={EsqueciSenhaEmail} />
       <Stack.Screen name="EsqueciSenhaCodigo" component={EsqueciSenhaCodigo} />
       <Stack.Screen name="Main" component={BottomTabs} />
+      <Stack.Screen name="Perfil" component={PerfilStack} />
     </Stack.Navigator>
   );
 }

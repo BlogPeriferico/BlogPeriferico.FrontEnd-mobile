@@ -1,4 +1,3 @@
-// src/routes/BottomTabs.jsx
 import React from "react";
 import { Platform, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -8,14 +7,16 @@ import NoticiasStack from "./NoticiasStack";
 import DoacaoStack from "./DoacaoStack";
 import VagasStack from "./VagasStack";
 import SobreStack from "./SobreStack";
+import VendasStack from "./VendasStack";
 
-import AchadinhosScreen from "../screens/achadinhos/Achadinhos";
+// ❌ REMOVA esta linha se ela existir
+// import PerfilStack from "./PerfilStack";
 
 import IconNews from "../assets/svgs/tab/Jornal.svg";
 import IconHandHeart from "../assets/svgs/tab/MaoCoracao.svg";
 import IconStore from "../assets/svgs/tab/Loja.svg";
 import IconMegaphone from "../assets/svgs/tab/Megafone.svg";
-import IconQuestion from "../assets/svgs/tab/Interrogacao.svg"; 
+import IconQuestion from "../assets/svgs/tab/Interrogacao.svg";
 
 const Tab = createBottomTabNavigator();
 
@@ -59,52 +60,27 @@ export default function BottomTabs() {
       <Tab.Screen
         name="NoticiasTab"
         component={NoticiasStack}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <IconNews width={28} height={28} color={focused ? ACTIVE : INACTIVE} />
-          ),
-        }}
+        options={{ tabBarIcon: ({ focused }) => <IconNews width={28} height={28} color={focused ? ACTIVE : INACTIVE} /> }}
       />
-
       <Tab.Screen
         name="DoacoesTab"
         component={DoacaoStack}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <IconHandHeart width={28} height={28} color={focused ? ACTIVE : INACTIVE} />
-          ),
-        }}
+        options={{ tabBarIcon: ({ focused }) => <IconHandHeart width={28} height={28} color={focused ? ACTIVE : INACTIVE} /> }}
       />
-
       <Tab.Screen
-        name="AchadinhosTab"
-        component={AchadinhosScreen}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <IconStore width={28} height={28} color={focused ? ACTIVE : INACTIVE} />
-          ),
-        }}
+        name="VendasTab"
+        component={VendasStack}
+        options={{ tabBarIcon: ({ focused }) => <IconStore width={28} height={28} color={focused ? ACTIVE : INACTIVE} /> }}
       />
-
       <Tab.Screen
         name="MaoAmigaTab"
         component={VagasStack}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <IconMegaphone width={28} height={28} color={focused ? ACTIVE : INACTIVE} />
-          ),
-        }}
+        options={{ tabBarIcon: ({ focused }) => <IconMegaphone width={28} height={28} color={focused ? ACTIVE : INACTIVE} /> }}
       />
-
-      {/* SOBRE */}
       <Tab.Screen
         name="SobreTab"
         component={SobreStack}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <IconQuestion width={28} height={28} color={focused ? ACTIVE : INACTIVE} />
-          ),
-        }}
+        options={{ tabBarIcon: ({ focused }) => <IconQuestion width={28} height={28} color={focused ? ACTIVE : INACTIVE} /> }}
       />
     </Tab.Navigator>
   );

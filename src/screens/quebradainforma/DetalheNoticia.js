@@ -1,3 +1,4 @@
+// src/screens/news/DetalheNoticia.jsx
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -18,9 +19,7 @@ import { styles as s } from "../../styles/news/DetalheNoticiaStyles";
 import api from "../../services/api";
 import { getToken, getUserId } from "../../services/auth";
 
-const dbg = (...a) => console.log("📰[DetalheNoticia]", ...a);
-
-/** ==== datas robustas ==== */
+/** ==== datas ==== */
 function toDate(val) {
   if (!val) return null;
   if (val instanceof Date) return val;
@@ -86,6 +85,37 @@ function stripHtml(x) {
   return x.replace(/<[^>]+>/g, "");
 }
 
+/** ==== mapa de usuários para hidratar foto e nome nos comentários/autor ==== */
+async function fetchUsuariosMap() {
+  try {
+    const { data } = await api.get("/usuarios/listar");
+    const arr = Array.isArray(data) ? data : [];
+    const byId = new Map();
+    for (const u of arr) {
+      const id = u?.id ?? u?.id_usuario ?? null;
+      if (id != null) {
+        byId.set(Number(id), {
+          nome: u?.nome ?? "Usuário",
+          fotoPerfil: u?.fotoPerfil ?? null,
+        });
+      }
+    }
+    return byId;
+  } catch {
+    return new Map();
+  }
+}
+function hydrateComentariosWithUsers(lista, usuariosById) {
+  return (lista || []).map((c) => {
+    const info = usuariosById.get(Number(c?.idUsuario));
+    return {
+      ...c,
+      nomeUsuario: c?.nomeUsuario || info?.nome || "Usuário",
+      fotoUsuario: c?.fotoUsuario || info?.fotoPerfil || null,
+    };
+  });
+}
+
 export default function DetalheNoticia({ route, navigation }) {
   const noticiaParam = route?.params?.noticia;
   const idParam = route?.params?.id;
@@ -96,6 +126,7 @@ export default function DetalheNoticia({ route, navigation }) {
   const [erro, setErro] = useState("");
 
   const [autor, setAutor] = useState("Autor desconhecido");
+  const [autorFoto, setAutorFoto] = useState(null); // <-- FOTO DO AUTOR
   const [loadingAutor, setLoadingAutor] = useState(true);
 
   const [comentarios, setComentarios] = useState([]);
@@ -105,42 +136,51 @@ export default function DetalheNoticia({ route, navigation }) {
   const [novoComentario, setNovoComentario] = useState("");
   const [enviando, setEnviando] = useState(false);
 
-  /** precisa refazer fetch se a rota mandou uma notícia incompleta */
+  const [usuariosById, setUsuariosById] = useState(new Map());
+  const [meuAvatar, setMeuAvatar] = useState(null);
+
   const needsFetchFromParam =
-    !!noticiaParam &&
-    (
-      !sanitizeStr(noticiaParam?.texto) &&
-      !sanitizeStr(noticiaParam?.descricao) &&
-      !sanitizeStr(noticiaParam?.conteudo) &&
-      !sanitizeStr(noticiaParam?.content) &&
-      !sanitizeStr(noticiaParam?.body)
-    ) ||
+    (!!noticiaParam &&
+      (!sanitizeStr(noticiaParam?.texto) &&
+        !sanitizeStr(noticiaParam?.descricao) &&
+        !sanitizeStr(noticiaParam?.conteudo) &&
+        !sanitizeStr(noticiaParam?.content) &&
+        !sanitizeStr(noticiaParam?.body)
+      )) ||
     noticiaParam?.dataHoraCriacao == null ||
     resolveUsuarioId(noticiaParam) == null;
 
-  // Busca notícia completa se necessário
+  // carrega mapa de usuários + notícia + meu avatar
   useEffect(() => {
     let live = true;
     (async () => {
       try {
+        const map = await fetchUsuariosMap();
+        if (!live) return;
+        setUsuariosById(map);
+
         if (noticiaParam && !needsFetchFromParam) {
-          dbg("via params (completo):", noticiaParam?.id);
           setNoticia(noticiaParam);
           setLoadingNoticia(false);
-          return;
-        }
-        const idUsar = idParam ?? noticiaParam?.id;
-        if (idUsar != null) {
-          setLoadingNoticia(true);
-          dbg("GET /noticias/", idUsar);
-          const { data } = await api.get(`/noticias/${idUsar}`);
-          dbg("RESP noticia:", data?.id);
-          if (live) setNoticia(data);
         } else {
-          setErro("Parâmetros inválidos para abrir a notícia.");
+          const idUsar = idParam ?? noticiaParam?.id;
+          if (idUsar != null) {
+            setLoadingNoticia(true);
+            const { data } = await api.get(`/noticias/${idUsar}`);
+            if (!live) return;
+            setNoticia(data);
+          } else {
+            setErro("Parâmetros inválidos para abrir a notícia.");
+          }
+        }
+
+        const uid = await getUserId();
+        if (uid && map.has(Number(uid))) {
+          setMeuAvatar(map.get(Number(uid))?.fotoPerfil || null);
+        } else {
+          setMeuAvatar(null);
         }
       } catch (e) {
-        dbg("ERRO carregar noticia:", e?.message || e);
         if (live) setErro(e?.message || "Erro ao carregar notícia");
       } finally {
         if (live) setLoadingNoticia(false);
@@ -149,58 +189,63 @@ export default function DetalheNoticia({ route, navigation }) {
     return () => { live = false; };
   }, [noticiaParam, idParam, needsFetchFromParam]);
 
-  useEffect(() => { if (noticia) dbg("STATE noticia:", JSON.stringify(noticia, null, 2)); }, [noticia]);
-
-  // Autor
+  // Autor (nome + foto)
   useEffect(() => {
     let live = true;
     (async () => {
       try {
         setLoadingAutor(true);
         const inline = resolveAutorInline(noticia);
-        if (inline) {
-          if (!live) return;
-          setAutor(inline);
-          setLoadingAutor(false);
-          return;
-        }
         const uid = resolveUsuarioId(noticia);
-        if (!uid) {
+
+        // Tenta resolver pelo mapa (um GET a menos)
+        if (uid && usuariosById.has(Number(uid))) {
+          const info = usuariosById.get(Number(uid));
           if (!live) return;
-          setAutor("Autor desconhecido");
+          setAutor(inline || info?.nome || "Autor desconhecido");
+          setAutorFoto(info?.fotoPerfil || null);
           setLoadingAutor(false);
           return;
         }
-        dbg("GET /usuarios/listar/", uid);
-        const { data } = await api.get(`/usuarios/listar/${uid}`);
-        dbg("RESP usuario:", data?.id, data?.nome);
+
+        // Se não tinha no mapa mas temos uid, busca direto
+        if (uid) {
+          const { data } = await api.get(`/usuarios/listar/${uid}`);
+          if (!live) return;
+          setAutor(inline || data?.nome || "Autor desconhecido");
+          setAutorFoto(data?.fotoPerfil || null);
+          setLoadingAutor(false);
+          return;
+        }
+
+        // Sem uid: usa inline e sem foto
         if (!live) return;
-        setAutor(data?.nome || "Autor desconhecido");
-      } catch (e) {
-        dbg("ERRO autor:", e?.message || e);
+        setAutor(inline || "Autor desconhecido");
+        setAutorFoto(null);
+      } catch {
         setAutor("Autor desconhecido");
+        setAutorFoto(null);
       } finally {
         setLoadingAutor(false);
       }
     })();
     return () => { live = false; };
-  }, [noticia]);
+  }, [noticia, usuariosById]);
 
   // Comentários – preview
   useEffect(() => {
     (async () => {
       try {
         if (noticia?.id) {
-          dbg("GET /comentarios/noticia/", noticia.id);
           const { data } = await api.get(`/comentarios/noticia/${noticia.id}`);
-          dbg("RESP comentarios count:", Array.isArray(data) ? data.length : 0);
-          setComentarios(Array.isArray(data) ? data : []);
+          const arr = Array.isArray(data) ? data : [];
+          setComentarios(hydrateComentariosWithUsers(arr, usuariosById));
         }
       } catch {
         setComentarios([]);
       }
     })();
-  }, [noticia?.id]);
+  }, [noticia?.id, usuariosById]);
 
   // Comentários – ao abrir seção
   useEffect(() => {
@@ -208,17 +253,16 @@ export default function DetalheNoticia({ route, navigation }) {
       if (!showComentarios || !noticia?.id) return;
       setLoadingComentarios(true);
       try {
-        dbg("GET /comentarios/noticia/ (abrir)", noticia.id);
         const { data } = await api.get(`/comentarios/noticia/${noticia.id}`);
-        dbg("RESP comentarios (abrir):", Array.isArray(data) ? data.length : 0);
-        setComentarios(Array.isArray(data) ? data : []);
+        const arr = Array.isArray(data) ? data : [];
+        setComentarios(hydrateComentariosWithUsers(arr, usuariosById));
       } catch {
         setComentarios([]);
       } finally {
         setLoadingComentarios(false);
       }
     })();
-  }, [showComentarios, noticia?.id]);
+  }, [showComentarios, noticia?.id, usuariosById]);
 
   const enviarComentario = useCallback(async () => {
     try {
@@ -236,19 +280,26 @@ export default function DetalheNoticia({ route, navigation }) {
 
       setEnviando(true);
       const payload = { texto: novoComentario, idNoticia: noticia.id, idUsuario: Number(userId) };
-      dbg("POST /comentarios", payload);
-      const { data } = await api.post("/comentarios", payload, { headers: { Authorization: `Bearer ${token}` } });
-      dbg("RESP criar comentario:", data?.id);
+      const { data } = await api.post("/comentarios", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const info = usuariosById.get(Number(userId));
+      const enriquecido = {
+        ...data,
+        nomeUsuario: data?.nomeUsuario || info?.nome || "Você",
+        fotoUsuario: data?.fotoUsuario || info?.fotoPerfil || meuAvatar || null,
+      };
+
       Alert.alert("Sucesso", "Comentário publicado!");
       setNovoComentario("");
-      setComentarios((prev) => [...prev, data]);
+      setComentarios((prev) => [...prev, enriquecido]);
     } catch (e) {
-      dbg("ERRO comentar:", e?.message || e, e?.response?.data);
       Alert.alert("Erro", e?.response?.data?.message || "Não foi possível enviar o comentário.");
     } finally {
       setEnviando(false);
     }
-  }, [novoComentario, noticia?.id]);
+  }, [novoComentario, noticia?.id, usuariosById, meuAvatar]);
 
   const dataStr = useMemo(() => formatDatePt(noticia?.dataHoraCriacao), [noticia?.dataHoraCriacao]);
 
@@ -258,7 +309,6 @@ export default function DetalheNoticia({ route, navigation }) {
   );
 
   const descricaoFinal = useMemo(() => {
-    // cobre vários campos possíveis e remove HTML simples
     const candidates = [
       sanitizeStr(noticia?.texto),
       sanitizeStr(noticia?.descricao),
@@ -266,10 +316,8 @@ export default function DetalheNoticia({ route, navigation }) {
       sanitizeStr(noticia?.content),
       sanitizeStr(noticia?.body),
     ].filter(Boolean);
-
     const raw = candidates.find((v) => v.length > 0) || "";
     const cleaned = stripHtml(raw).trim();
-
     return cleaned.length ? cleaned : "Sem conteúdo disponível.";
   }, [noticia?.texto, noticia?.descricao, noticia?.conteudo, noticia?.content, noticia?.body]);
 
@@ -312,14 +360,22 @@ export default function DetalheNoticia({ route, navigation }) {
           ) : (
             <>
               {noticia?.imagem ? (
-                <Image source={{ uri: noticia.imagem }} style={[s.cover, { alignSelf: "center" }]} resizeMode="contain" />
+                <Image
+                  source={{ uri: noticia.imagem }}
+                  style={[s.cover, { alignSelf: "center" }]}
+                  resizeMode="contain"
+                />
               ) : null}
 
               <Text style={s.title}>{noticia?.titulo || "Notícia"}</Text>
 
               {/* Autor + meta */}
               <View style={s.metaRow}>
-                <View style={s.avatar} />
+                {autorFoto ? (
+                  <Image source={{ uri: autorFoto }} style={s.avatarImg} />
+                ) : (
+                  <View style={s.avatar} />
+                )}
                 <View style={{ flex: 1 }}>
                   <Text style={s.author}>{loadingAutor ? "Carregando autor..." : autor}</Text>
                   <View style={s.metaSubRow}>
@@ -331,9 +387,16 @@ export default function DetalheNoticia({ route, navigation }) {
               </View>
 
               {/* Comentários */}
-              <TouchableOpacity style={s.comentarioToggle} onPress={() => setShowComentarios((p) => !p)}>
+              <TouchableOpacity
+                style={s.comentarioToggle}
+                onPress={() => setShowComentarios((p) => !p)}
+              >
                 <Text style={s.comentarioToggleText}>{comentarios.length} comentários</Text>
-                <Ionicons name={showComentarios ? "chevron-up" : "chevron-down"} size={18} color="#374151" />
+                <Ionicons
+                  name={showComentarios ? "chevron-up" : "chevron-down"}
+                  size={18}
+                  color="#374151"
+                />
               </TouchableOpacity>
 
               {showComentarios && (
@@ -341,9 +404,13 @@ export default function DetalheNoticia({ route, navigation }) {
                   <Text style={s.comentariosTitulo}>Comentários</Text>
 
                   <View style={s.novoComentarioContainer}>
-                    <View style={s.avatarPlaceholder}>
-                      <Ionicons name="person" size={20} color="#888" />
-                    </View>
+                    {meuAvatar ? (
+                      <Image source={{ uri: meuAvatar }} style={s.avatarImg} />
+                    ) : (
+                      <View style={s.avatarPlaceholder}>
+                        <Ionicons name="person" size={20} color="#888" />
+                      </View>
+                    )}
                     <TextInput
                       value={novoComentario}
                       onChangeText={setNovoComentario}
@@ -358,7 +425,9 @@ export default function DetalheNoticia({ route, navigation }) {
                     onPress={enviarComentario}
                     disabled={enviando}
                   >
-                    <Text style={s.botaoPublicarTexto}>{enviando ? "Publicando..." : "Publicar"}</Text>
+                    <Text style={s.botaoPublicarTexto}>
+                      {enviando ? "Publicando..." : "Publicar"}
+                    </Text>
                   </TouchableOpacity>
 
                   {loadingComentarios ? (
@@ -388,7 +457,7 @@ export default function DetalheNoticia({ route, navigation }) {
                 </View>
               )}
 
-              {/* Descrição SEMPRE abaixo */}
+              {/* Descrição */}
               <View style={s.separator} />
               <Text style={s.body}>{descricaoFinal}</Text>
             </>

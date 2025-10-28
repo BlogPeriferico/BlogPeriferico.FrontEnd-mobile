@@ -1,24 +1,25 @@
 // src/services/auth.js
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "./api";
+import {
+  saveToken,
+  saveUserId,
+  getToken,
+  getUserId,
+  clearAuth,
+} from "./tokenStore";
 import { getUserIdByEmail } from "../services/usuario";
-
-export const TOKEN_KEY = "@auth/token";
-export const USERID_KEY = "@auth/userId";
-
-export async function saveToken(token) { try { await AsyncStorage.setItem(TOKEN_KEY, token); } catch {} }
-export async function saveUserId(id)   { try { if (id != null) await AsyncStorage.setItem(USERID_KEY, String(id)); } catch {} }
-export async function getToken()       { try { return (await AsyncStorage.getItem(TOKEN_KEY)) || null; } catch { return null; } }
-export async function getUserId()      { try { return (await AsyncStorage.getItem(USERID_KEY)) || null; } catch { return null; } }
-export async function clearAuth()      { try { await AsyncStorage.multiRemove([TOKEN_KEY, USERID_KEY]); } catch {} }
 
 /** Decodifica payload do JWT (sem libs externas) */
 function decodeJwtPayload(token) {
   try {
+    // RN nem sempre tem atob; se não tiver, aborta com null
+    const atobFn = globalThis.atob || null;
+    if (!atobFn) return null;
+
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
     const json = decodeURIComponent(
-      atob(base64).split("").map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join("")
+      atobFn(base64).split("").map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join("")
     );
     return JSON.parse(json);
   } catch { return null; }
@@ -108,31 +109,5 @@ export async function logout() {
   await clearAuth();
 }
 
-/** Recuperação de senha */
-export async function solicitarCodigo({ email }) {
-  console.log("📤 [AUTH] POST /auth/esqueci-senha", { email });
-  const resp = await api.post(
-    "/auth/esqueci-senha",
-    { email },
-    { headers: { Authorization: undefined, "Content-Type": "application/json" }, timeout: 30000 } // timeout maior
-  );
-  if (resp.status < 200 || resp.status >= 300) {
-    const err = new Error(resp?.data?.message || "Falha ao solicitar código de recuperação.");
-    err.status = resp.status; err.data = resp.data; throw err;
-  }
-  return resp.data;
-}
-
-export async function confirmarCodigoENovaSenha({ email, codigo, novaSenha }) {
-  console.log("📤 [AUTH] POST /auth/redefinir-senha", { email, codigo });
-  const resp = await api.post(
-    "/auth/redefinir-senha",
-    { email, codigo, novaSenha },
-    { headers: { Authorization: undefined, "Content-Type": "application/json" }, timeout: 30000 }
-  );
-  if (resp.status < 200 || resp.status >= 300) {
-    const err = new Error(resp?.data?.message || "Falha ao redefinir senha.");
-    err.status = resp.status; err.data = resp.data; throw err;
-  }
-  return resp.data;
-}
+// Reexporta utilidades se o app usar em outros lugares
+export { getToken, getUserId, clearAuth };

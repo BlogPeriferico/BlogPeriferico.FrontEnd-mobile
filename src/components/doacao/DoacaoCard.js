@@ -1,7 +1,7 @@
+// src/components/doacao/DoacaoCard.jsx
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { styles as s } from "../../styles/doacao/DoacaoCardStyles";
-
 
 export default function DoacaoCard({ item, onPress, regiao, style }) {
   const doador =
@@ -10,14 +10,12 @@ export default function DoacaoCard({ item, onPress, regiao, style }) {
   return (
     <TouchableOpacity
       activeOpacity={0.85}
-      onPress={onPress}
+      onPress={() => onPress?.(item)}  // ⬅️ passa o item pro handler
       style={[s.card, style]}
       accessibilityRole="button"
       accessibilityLabel={`Abrir doação ${item?.titulo || "sem título"}`}
     >
-      {/* Conteúdo com padding interno */}
       <View style={s.inner}>
-        {/* Imagem com radius dentro do card */}
         <View style={s.cardImageWrap}>
           {item?.imagem ? (
             <Image source={{ uri: item.imagem }} style={s.cardImage} resizeMode="cover" />
@@ -26,7 +24,6 @@ export default function DoacaoCard({ item, onPress, regiao, style }) {
           )}
         </View>
 
-        {/* Texto */}
         <View style={s.cardBody}>
           <Text style={s.cardTitle} numberOfLines={2}>
             {item?.titulo || "Doação"}

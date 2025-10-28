@@ -1,3 +1,4 @@
+// src/screens/doacoes/Doacoes.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -8,28 +9,38 @@ import {
   Alert,
   RefreshControl,
   DeviceEventEmitter,
+  Dimensions,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 
 import Header from "../../components/Header";
 import DoacaoCard from "../../components/doacao/DoacaoCard";
+import DoacaoCarrossel from "../../components/doacao/DoacaoCarrossel";
 import { styles as listS } from "../../styles/doacao/DoacoesStyles";
 import { useRegionTheme } from "../../utils/regionTheme";
 import { getTodasDoacoes, paginaDoacoes } from "../../services/doacoes";
+import AddIcon from "../../assets/svgs/Add.svg"; // ⬅️ botão adicionar
 
 const H_PADDING = 16;
 const GUTTER = 12;
 
-const dbg = (...a) => console.log("🎁[Doacoes]", ...a);
+const SCREEN_W = Dimensions.get("window").width;
+const CARD_W = (SCREEN_W - H_PADDING * 2 - GUTTER) / 2;
 
 function norm(x) { return String(x ?? "").toLowerCase().trim(); }
 function matchDoacao(item, q) {
   const n = norm(q);
-  const campos = [
-    item.titulo, item.descricao, item.local,
-    item.regiao, item.zona, item.categoria,
-  ];
+  const campos = [item.titulo, item.descricao, item.local, item.regiao, item.zona, item.categoria];
   return campos.some((c) => norm(c).includes(n));
+}
+function dedupeById(arr) {
+  const seen = new Set();
+  const out = [];
+  for (const it of arr || []) {
+    const k = it?.id ?? "";
+    if (!seen.has(k)) { seen.add(k); out.push(it); }
+  }
+  return out;
 }
 
 export default function Doacoes({ navigation }) {
@@ -52,9 +63,7 @@ export default function Doacoes({ navigation }) {
 
   const carregar = useCallback(async () => {
     const data = await getTodasDoacoes();
-    const filtradas = (data || []).filter(
-      (d) => norm(d.regiao ?? d.zona) === norm(regiao)
-    );
+    const filtradas = dedupeById((data || []).filter((d) => norm(d.regiao ?? d.zona) === norm(regiao)));
     setBase(filtradas);
 
     if (!emBusca) {
@@ -71,23 +80,20 @@ export default function Doacoes({ navigation }) {
     try {
       setLoading(true);
       await carregar();
-    } catch (e) {
-      dbg("ERRO carregar:", e?.message || e);
+    } catch {
       Alert.alert("Erro", "Não foi possível carregar as doações.");
     } finally {
       setLoading(false);
     }
   }, [carregar]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
   const onRefresh = useCallback(async () => {
     try {
       setRefreshing(true);
       await carregar();
-    } catch (e) {
+    } catch {
       Alert.alert("Erro", "Falha ao atualizar as doações.");
     } finally {
       setRefreshing(false);
@@ -100,7 +106,7 @@ export default function Doacoes({ navigation }) {
       setLoadingMore(true);
       const next = pageState.page + 1;
       const pg = paginaDoacoes(base, { page: next, pageSize: pageState.pageSize });
-      setItens((old) => [...old, ...pg.items]);
+      setItens((old) => dedupeById([...old, ...pg.items]));
       setPageState({ page: next, pageSize: pageState.pageSize, hasMore: pg.hasMore });
     } finally {
       setLoadingMore(false);
@@ -123,20 +129,9 @@ export default function Doacoes({ navigation }) {
 
   // listeners de busca
   useEffect(() => {
-    const s1 = DeviceEventEmitter.addListener("search:scope:doacoes", ({ q, from }) => {
-      dbg("📥 escopo", q, "from:", from);
-      aplicarBusca(q);
-    });
-    const s2 = DeviceEventEmitter.addListener("search:DoacoesHome", ({ q }) => {
-      dbg("📥 rota DoacoesHome", q);
-      aplicarBusca(q);
-    });
-    const s3 = DeviceEventEmitter.addListener("app:search", ({ q, scope }) => {
-      if (scope === "doacoes") {
-        dbg("📥 global (scope ok)", q);
-        aplicarBusca(q);
-      }
-    });
+    const s1 = DeviceEventEmitter.addListener("search:scope:doacoes", ({ q }) => aplicarBusca(q));
+    const s2 = DeviceEventEmitter.addListener("search:DoacoesHome", ({ q }) => aplicarBusca(q));
+    const s3 = DeviceEventEmitter.addListener("app:search", ({ q, scope }) => { if (scope === "doacoes") aplicarBusca(q); });
     return () => { s1.remove(); s2.remove(); s3.remove(); };
   }, [aplicarBusca]);
 
@@ -152,6 +147,7 @@ export default function Doacoes({ navigation }) {
   const hasMore = !emBusca && pageState.hasMore;
 
   const goDetalhe = (d) => navigation.navigate("DetalheDoacao", { id: d.id, doacao: d });
+  const goNovaDoacao = () => navigation.navigate("NovaDoacao");
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -168,21 +164,35 @@ export default function Doacoes({ navigation }) {
           />
         }
       >
-        <View style={{ paddingTop: 90, paddingBottom: 8 }}>
-          <View style={[listS.tituloRow, { marginBottom: 8 }]}>
+        <View style={{ paddingTop: 12, paddingBottom: 8 }}>
+          {/* Carrossel logo no topo, com margem discreta */}
+          <DoacaoCarrossel navigation={navigation} containerStyle={{ marginBottom: 12 }} />
+
+          {/* Título + Ação (igual outras seções) */}
+          <View style={listS.headerRow}>
             <Text style={[listS.tituloSecao, { color: colors.primary }]}>
-              {emBusca ? "Resultados de doações" : "Seleções de Doações"}
+              {emBusca ? "Resultados de Doações" : "Seleções de Doações"}
             </Text>
 
             {emBusca ? (
               <TouchableOpacity
                 onPress={() => aplicarBusca("")}
                 activeOpacity={0.85}
-                style={[listS.verMaisBtn, { backgroundColor: "#fff", borderColor: colors.primary, borderWidth: 1 }]}
+                style={[listS.addBtn, { borderColor: colors.primary, backgroundColor: "#fff", borderWidth: 1 }]}
               >
-                <Text style={[listS.verMaisLabel, { color: colors.primary }]}>Limpar</Text>
+                <Text style={{ color: colors.primary, fontWeight: "600" }}>Limpar</Text>
               </TouchableOpacity>
-            ) : null}
+            ) : (
+              <TouchableOpacity
+                onPress={goNovaDoacao}
+                accessibilityLabel="Adicionar doação"
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                activeOpacity={0.9}
+                style={[listS.addBtn, { borderColor: colors.primary }]}
+              >
+                <AddIcon width={16} height={16} color={colors.primary} />
+              </TouchableOpacity>
+            )}
           </View>
 
           {emBusca && (
@@ -209,7 +219,7 @@ export default function Doacoes({ navigation }) {
                       item={d}
                       regiao={regiao}
                       onPress={() => goDetalhe(d)}
-                      style={{ marginRight: isLeftCol ? GUTTER : 0 }}
+                      style={{ width: CARD_W, marginRight: isLeftCol ? GUTTER : 0 }}
                     />
                   );
                 })}
