@@ -5,9 +5,7 @@ import { getToken, getUserId } from "./auth"; // se preferir, pegue de tokenStor
 
 const BASE_URL = "https://backblog.azurewebsites.net";
 
-/** =========================
- *  LISTAGEM / PAGINAÇÃO
- *  ========================= */
+/* LISTAGEM / PAGINAÇÃO */
 export async function getTodasVendas() {
   const { data } = await api.get("/vendas");
   const arr = Array.isArray(data) ? data : [];
@@ -32,8 +30,8 @@ export async function criarVenda({
   telefone,
   cpf,
   zona,
-  valor,          // number ou string
-  imagemFile,     // { uri, fileName?, mimeType? }
+  valor,          
+  imagemFile,     
   token,
 }) {
   const authToken = token || (await getToken());
@@ -88,9 +86,7 @@ export async function criarVenda({
   }
 }
 
-/** =========================
- *  Helpers de mapeamento
- *  ========================= */
+/* Helpers de mapeamento  */
 export function mapVendaFromDTO(d = {}) {
   return {
     id: d?.id != null ? String(d.id) : "",
@@ -99,16 +95,14 @@ export function mapVendaFromDTO(d = {}) {
     imagem: d?.imagem ?? "",
     telefone: d?.telefone ?? "",
     cpf: d?.cpf ?? "",
-    valor: d?.valor ?? null, // Float no back
+    valor: d?.valor ?? null, 
     zona: d?.zona ?? "",
     dataHoraCriacao: d?.dataHoraCriacao ?? "",
     idUsuario: d?.idUsuario ?? null,
   };
 }
 
-/** =========================
- *  Utils
- *  ========================= */
+/* Utils */
 function filenameFromUri(uri = "") {
   try {
     const p = uri.split("?")[0];

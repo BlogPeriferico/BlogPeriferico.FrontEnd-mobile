@@ -20,19 +20,19 @@ export default function EsqueciSenhaEmail({ navigation }) {
 
   const handleEnviar = async () => {
     const emailTrim = String(email).trim();
-    console.log("🔵 [ESQ-EMAIL] submit com:", emailTrim);
+    console.log(" [ESQ-EMAIL] submit com:", emailTrim);
 
     if (!validarEmail(emailTrim)) {
-      console.log("🟠 [ESQ-EMAIL] e-mail inválido");
+      console.log(" [ESQ-EMAIL] e-mail inválido");
       showError("Digite um e-mail válido.", "Atenção");
       return;
     }
 
     try {
       setLoading(true);
-      console.log("📤 [ESQ-EMAIL] chamando solicitarCodigo", { email: emailTrim });
+      console.log(" [ESQ-EMAIL] chamando solicitarCodigo", { email: emailTrim });
       await solicitarCodigo({ email: emailTrim });
-      console.log("✅ [ESQ-EMAIL] código enviado OK");
+      console.log(" [ESQ-EMAIL] código enviado OK");
 
       setModal({
         visible: true,
@@ -42,7 +42,7 @@ export default function EsqueciSenhaEmail({ navigation }) {
       });
     } catch (err) {
       const msg = formatApiError(err, "recovery-send");
-      console.log("❌ [ESQ-EMAIL] erro ao solicitar código:", {
+      console.log(" [ESQ-EMAIL] erro ao solicitar código:", {
         message: err?.message,
         status: err?.status,
         details: err,

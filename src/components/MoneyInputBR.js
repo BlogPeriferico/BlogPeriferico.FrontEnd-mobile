@@ -1,42 +1,38 @@
 import React, { useMemo, useCallback, useState, useEffect } from "react";
 import { TextInput, View, Text } from "react-native";
 
-const onlyDigits = (s = "") => String(s).replace(/\D/g, "").slice(0, 12); // até trilhões (ajuste se quiser)
+const onlyDigits = (s = "") => String(s).replace(/\D/g, "").slice(0, 12); 
 
 function centsToMaskedBRL(cents) {
   const i = Math.max(0, Number.isFinite(cents) ? cents : 0);
-  const str = String(i).padStart(3, "0"); // garante pelo menos 3 dígitos
+  const str = String(i).padStart(3, "0"); 
   const intPart = str.slice(0, -2);
   const decPart = str.slice(-2);
-  // milhar com pontos
   const withThousands = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   return `${withThousands},${decPart}`;
 }
 
 function maskedToCents(masked = "") {
-  // aceita "1.234,56" ou "1234,56" ou "123456" etc.
   const digits = onlyDigits(masked);
   if (!digits) return 0;
-  // últimos 2 dígitos são centavos
-  if (digits.length === 1) return Number(digits) * 1; // "5" -> 0,05
-  if (digits.length === 2) return Number(digits);     // "56" -> 0,56
+  if (digits.length === 1) return Number(digits) * 1; 
+  if (digits.length === 2) return Number(digits);    
   return Number(digits.slice(0, -2)) * 100 + Number(digits.slice(-2));
 }
 
 export default function MoneyInputBR({
-  value,              // número em reais (ex.: 1234.56) ou string
-  onChangeRaw,        // recebe número em reais (ex.: 1234.56)
-  onValidChange,      // boolean (valor > 0)
+  value,             
+  onChangeRaw,        
+  onValidChange,      
   colors = {},
   placeholder = "0,00",
   style,
   inputProps = {},
   min = 0,
-  max,                // opcional
+  max,                
   disabled = false,
   showErrorText = false,
 }) {
-  // estado interno em CENTAVOS (number)
   const initialCents = useMemo(() => {
     const n = Number(String(value).replace(",", "."));
     if (!Number.isFinite(n)) return 0;
@@ -50,7 +46,6 @@ export default function MoneyInputBR({
     const n = Number(String(value).replace(",", "."));
     const next = Number.isFinite(n) ? Math.round(n * 100) : 0;
     if (next !== cents) setCents(next);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   // validade
@@ -63,14 +58,12 @@ export default function MoneyInputBR({
 
   useEffect(() => {
     if (typeof onValidChange === "function") onValidChange(isValid);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isValid]);
 
   const handleChange = useCallback((txt) => {
     const nextCents = maskedToCents(txt);
     let bounded = nextCents;
     if (typeof max === "number") bounded = Math.min(bounded, Math.round(max * 100));
-    // min não precisa travar digitação; apenas valida
     setCents(bounded);
     if (typeof onChangeRaw === "function") onChangeRaw(bounded / 100);
   }, [onChangeRaw, max]);

@@ -74,13 +74,13 @@ export default function Login({ navigation, route }) {
         await AsyncStorage.removeItem(STORAGE_KEYS.EMAIL);
       }
 
-      resetToMain(); // sucesso
+      resetToMain();
 
     } catch (error) {
       const msg = formatApiError(error, "login");
       if (error?.status === 401 || error?.code === "INVALID_CREDENTIALS") {
         setCampoInvalido({ email: true, senha: true });
-        showError(msg); // “Não foi possível entrar. E-mail ou senha inválidos.”
+        showError(msg); 
       } else {
         showError(msg);
       }

@@ -30,9 +30,8 @@ export function humanizeHttpError(status, bodyText) {
   return msgFromBody || `Falha (${status}).`;
 }
 
-// ——— DIAGNÓSTICO DE ERROS (Axios ou fetch) ———
+//  DIAGNÓSTICO DE ERROS 
 export function formatAxiosError(err) {
-  // Axios: err.response (tem status e data), err.request (sem resposta), err.message
   const r = err?.response;
   const status = r?.status ?? 0;
   const url = r?.config?.url || err?.config?.url || "";
@@ -54,10 +53,9 @@ export function formatAxiosError(err) {
 }
 
 export async function formatFetchError(resp, fallbackText = "") {
-  // fetch: resp.ok, resp.status, resp.url; corpo já lido externamente
   const status = resp?.status ?? 0;
   const url = resp?.url || "";
-  const method = "POST"; // você sabe no ponto de chamada
+  const method = "POST"; 
   const human = humanizeHttpError(status, fallbackText);
   return {
     status,

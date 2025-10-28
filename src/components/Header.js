@@ -1,4 +1,3 @@
-// src/components/Header.js
 import React, { useRef, useState, useMemo } from "react";
 import {
   View,
@@ -22,7 +21,7 @@ import RegionSelector from "../components/RegionSelector";
 import { useRegiao } from "../contexts/RegionContext";
 import { useRegionTheme } from "../utils/regionTheme";
 import { navigationRef } from "../navigation/navigationRef";
-import { TOKEN_KEY } from "../services/tokenStore"; // ← se existir no projeto
+import { TOKEN_KEY } from "../services/tokenStore"; 
 
 const { width } = Dimensions.get("window");
 const dbg = (...a) => console.log("🧱[Header]", ...a);
@@ -178,15 +177,12 @@ export default function Header() {
     }
   };
 
-  // ---- LOGOUT ----
   const handleLogout = async () => {
     try {
-      // fecha o menu antes de mexer na navegação
       fecharMenu();
 
-      // limpa credenciais do app
       const candidates = [
-        TOKEN_KEY || "auth_token", // preferencial se vier do tokenStore
+        TOKEN_KEY || "auth_token", 
         "USER_ID_KEY",
         "user_id",
         "auth:token",
@@ -198,13 +194,9 @@ export default function Header() {
         )
       );
 
-      // avisa o app (se alguém escutar)
       DeviceEventEmitter.emit("auth:logout");
 
-      // feedback opcional
-      // Alert.alert("Sessão encerrada", "Você saiu da sua conta.");
-
-      // reseta navegação para Login
+      
       navigationRef?.reset?.({
         index: 0,
         routes: [{ name: "Login" }],
@@ -214,7 +206,6 @@ export default function Header() {
       Alert.alert("Erro", "Não foi possível sair. Tente novamente.");
     }
   };
-  // ---- /LOGOUT ----
 
   return (
     <>
@@ -333,7 +324,7 @@ export default function Header() {
 
               <View style={styles.drawerDivider} />
 
-              {/* SAIR - deslogar */}
+              {/* deslogar */}
               <TouchableOpacity onPress={handleLogout}>
                 <Text style={[styles.modalItem, { color: "#B00020" }]}>Sair</Text>
               </TouchableOpacity>

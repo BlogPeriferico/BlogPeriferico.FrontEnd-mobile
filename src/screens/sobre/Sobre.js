@@ -1,4 +1,3 @@
-// src/pages/SobreNos/SobreNos.jsx
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "../../components/Header";

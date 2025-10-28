@@ -1,4 +1,3 @@
-// src/screens/doacoes/DetalheDoacao.jsx
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
   View, Text, Image, TouchableOpacity, ActivityIndicator, Alert,
@@ -6,12 +5,10 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-// Estilos
-import { styles as s } from "../../styles/doacao/DetalheDoacaoStyles"; // crie igual ao de vendas/vagas
+import { styles as s } from "../../styles/doacao/DetalheDoacaoStyles";
 import { styles as listS } from "../../styles/doacao/DoacoesStyles";
-import { styles as ns } from "../../styles/news/DetalheNoticiaStyles"; // reaproveita comentários
+import { styles as ns } from "../../styles/news/DetalheNoticiaStyles"; 
 
-// Componentes/serviços
 import DoacaoCard from "../../components/doacao/DoacaoCard";
 import { useRegionTheme } from "../../utils/regionTheme";
 import api from "../../services/api";
@@ -60,7 +57,7 @@ function formatDatePt(dateIso) {
   } catch { return ""; }
 }
 
-// --------- helpers p/ avatars dos comentários ---------
+//elpers p/ avatars dos comentários
 async function fetchUsuariosMap() {
   try {
     const { data } = await api.get("/usuarios/listar");
@@ -100,7 +97,6 @@ export default function DetalheDoacao({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
 
-  // usuarios p/ avatar
   const [usuariosById, setUsuariosById] = useState(new Map());
   const [meuAvatar, setMeuAvatar] = useState(null);
 
@@ -109,12 +105,10 @@ export default function DetalheDoacao({ route, navigation }) {
     (async () => {
       try {
         setLoading(true);
-        // carrega usuários (para avatar dos comentários)
         const map = await fetchUsuariosMap();
         if (!live) return;
         setUsuariosById(map);
 
-        // pega doação
         if (doacaoParam) {
           setDoacao(doacaoParam);
         } else if (idParam != null) {
@@ -125,7 +119,6 @@ export default function DetalheDoacao({ route, navigation }) {
           throw new Error("Parâmetros inválidos para abrir a doação.");
         }
 
-        // meu avatar (se houver userId salvo)
         const uid = await getUserId();
         if (uid && map.has(Number(uid))) {
           setMeuAvatar(map.get(Number(uid))?.fotoPerfil || null);
@@ -156,16 +149,13 @@ export default function DetalheDoacao({ route, navigation }) {
     else Alert.alert("Não foi possível abrir o WhatsApp", whatsappHref);
   }, [whatsappHref]);
 
-  // ===============================
   // Comentários
-  // ===============================
   const [comentarios, setComentarios] = useState([]);
   const [loadingComentarios, setLoadingComentarios] = useState(false);
   const [showComentarios, setShowComentarios] = useState(false);
   const [novoComentario, setNovoComentario] = useState("");
   const [enviando, setEnviando] = useState(false);
 
-  // Preview inicial
   useEffect(() => {
     (async () => {
       try {
@@ -179,7 +169,6 @@ export default function DetalheDoacao({ route, navigation }) {
     })();
   }, [doacao?.id, usuariosById]);
 
-  // Carrega ao abrir a sessão
   useEffect(() => {
     (async () => {
       if (showComentarios && doacao?.id) {
@@ -219,7 +208,6 @@ export default function DetalheDoacao({ route, navigation }) {
         token,
       });
 
-      // hidrata novo com nome/foto
       const info = usuariosById.get(Number(userId));
       const enriquecido = {
         ...criado,
@@ -240,9 +228,7 @@ export default function DetalheDoacao({ route, navigation }) {
     }
   }, [novoComentario, doacao?.id, usuariosById, meuAvatar]);
 
-  // ===============================
   // Relacionadas
-  // ===============================
   const [relLoading, setRelLoading] = useState(true);
   const [relItens, setRelItens] = useState([]);
   const [relState, setRelState] = useState({ page: 1, pageSize: 6, hasMore: true });
@@ -344,7 +330,7 @@ export default function DetalheDoacao({ route, navigation }) {
                   </Text>
                 </View>
 
-                {/* =============== Comentários =============== */}
+                {/*  Comentários  */}
                 <TouchableOpacity
                   style={ns.comentarioToggle}
                   onPress={() => setShowComentarios((prev) => !prev)}
@@ -419,7 +405,7 @@ export default function DetalheDoacao({ route, navigation }) {
                     )}
                   </View>
                 )}
-                {/* =============== Comentários =============== */}
+                {/*  Comentários  */}
               </>
             )}
           </View>

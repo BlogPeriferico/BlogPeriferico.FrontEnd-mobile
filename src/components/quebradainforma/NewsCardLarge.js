@@ -10,7 +10,6 @@ export default function NewsCardLarge({ noticia, onPress }) {
       activeOpacity={0.85}
       style={{
         backgroundColor: "#fff",
-        // sem borderRadius
         borderWidth: 1,
         borderColor: "#D9E2EC",
       }}

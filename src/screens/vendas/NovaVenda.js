@@ -112,9 +112,9 @@ export default function NovaVenda({ navigation }) {
         titulo,
         descricao,
         telefone,
-        cpf, // só dígitos (CPFInputBR garante)
+        cpf, 
         zona: mapRegiaoToEnum(regiao),
-        valor, // number em reais (ex.: 1234.56)
+        valor, 
         imagemFile: img,
       });
       Alert.alert("Sucesso", "Venda criada!");
@@ -197,11 +197,10 @@ export default function NovaVenda({ navigation }) {
             <Text style={{ fontWeight: "600", color: colors.primary, marginBottom: 6 }}>Valor</Text>
             <MoneyInputBR
               value={valor}
-              onChangeRaw={setValor}          // número em reais
+              onChangeRaw={setValor}          
               onValidChange={setValorValido}
               colors={colors}
               showErrorText={false}
-              // min={0.01} // se quiser obrigar mínimo de 1 centavo
             />
 
             {/* Descrição */}

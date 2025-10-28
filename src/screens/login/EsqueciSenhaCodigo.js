@@ -38,34 +38,34 @@ export default function EsqueciSenhaCodigo({ route, navigation }) {
   const codigo = digits.join("");
 
   const handleConfirmar = async () => {
-    console.log("🔵 [ESQ-COD] confirmar", { email, codigoLen: codigo.length });
+    console.log(" [ESQ-COD] confirmar", { email, codigoLen: codigo.length });
 
     if (!email) {
-      console.log("🟠 [ESQ-COD] email ausente");
+      console.log(" [ESQ-COD] email ausente");
       showError("E-mail não encontrado. Volte e preencha o e-mail.", "Atenção");
       return;
     }
     if (codigo.length !== 6) {
-      console.log("🟠 [ESQ-COD] código inválido:", codigo);
+      console.log(" [ESQ-COD] código inválido:", codigo);
       showError("Digite o código de 6 dígitos.", "Atenção");
       return;
     }
     if (!senha || senha.length < 6) {
-      console.log("🟠 [ESQ-COD] senha curta");
+      console.log(" [ESQ-COD] senha curta");
       showError("A nova senha deve ter no mínimo 6 caracteres.", "Atenção");
       return;
     }
     if (senha !== confirma) {
-      console.log("🟠 [ESQ-COD] senhas diferentes");
+      console.log(" [ESQ-COD] senhas diferentes");
       showError("As senhas não coincidem.", "Atenção");
       return;
     }
 
     try {
       setLoading(true);
-      console.log("📤 [ESQ-COD] chamando confirmarCodigoENovaSenha", { email, codigo, novaSenhaLen: senha.length });
+      console.log(" [ESQ-COD] chamando confirmarCodigoENovaSenha", { email, codigo, novaSenhaLen: senha.length });
       await confirmarCodigoENovaSenha({ email, codigo, novaSenha: senha });
-      console.log("✅ [ESQ-COD] senha alterada OK");
+      console.log("[ESQ-COD] senha alterada OK");
       setModal({
         visible: true,
         type: "success",
@@ -74,7 +74,7 @@ export default function EsqueciSenhaCodigo({ route, navigation }) {
       });
     } catch (err) {
       const msg = formatApiError(err, "recovery-confirm");
-      console.log("❌ [ESQ-COD] erro ao confirmar:", {
+      console.log(" [ESQ-COD] erro ao confirmar:", {
         message: err?.message,
         status: err?.status,
         details: err,

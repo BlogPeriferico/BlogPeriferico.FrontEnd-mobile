@@ -1,4 +1,3 @@
-// src/screens/perfil/Perfil.jsx
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
@@ -29,9 +28,9 @@ import { getTodasVagas } from "../../services/vagas";
 
 import AvatarPlaceholder from "../../assets/svgs/avatar-placeholder.svg";
 
-/* ============================
+/* 
  * Helpers pra ID do dono
- * ============================ */
+ *  */
 
 function normId(x) {
   const n = Number(x);
@@ -118,9 +117,9 @@ export default function Perfil({ navigation }) {
     );
   };
 
-  /* ============================
+  /* 
    * carrega dados do usuário
-   * ============================ */
+   *  */
   const loadUser = useCallback(async () => {
     console.log("🔎 [Perfil] loadUser() start");
 
@@ -150,9 +149,9 @@ export default function Perfil({ navigation }) {
     }
   }, []);
 
-  /* ============================
+  /* 
    * carrega listas e aplica filtro
-   * ============================ */
+   *  */
   const loadLists = useCallback(async (uidNum) => {
     console.log("🔎 [Perfil] loadLists() uidNum=", uidNum);
 
@@ -191,8 +190,6 @@ export default function Perfil({ navigation }) {
       vagas: arrG.length,
     });
 
-    // função que tenta filtrar só o que é meu,
-    // mas se não tiver como saber dono -> devolve tudo e marca fallback
     function filtraSmart(lista, tipo) {
       if (!lista.length) {
         return { dados: [], fallback: false };
@@ -214,11 +211,10 @@ export default function Perfil({ navigation }) {
       return { dados: minhas, fallback: false };
     }
 
-    // aplicar para cada tipo
     const noticiasCalc = filtraSmart(arrN, "noticias");
     const doacoesCalc = filtraSmart(arrD, "doacoes");
 
-    // vendas e vagas normalmente já vêm com idUsuario
+    // vendas e vagas 
     const minhasVendasCalc = arrV.filter(
       (it) => resolveIdUsuarioFromItem(it) === uidNum
     );
@@ -240,9 +236,7 @@ export default function Perfil({ navigation }) {
     setIsFallbackDoacoes(doacoesCalc.fallback);
   }, []);
 
-  /* ============================
-   * ciclo de carregamento inicial
-   * ============================ */
+  /*  ciclo de carregamento inicial  */
   const loadAll = useCallback(async () => {
     try {
       setLoading(true);
@@ -278,9 +272,9 @@ export default function Perfil({ navigation }) {
     }
   }, [loadLists, loadUser]);
 
-  /* ============================
+  /* 
    * memo pro header
-   * ============================ */
+   *  */
   const nomeUsuario = useMemo(() => user?.nome || "Seu nome", [user?.nome]);
   const bioUsuario = useMemo(
     () =>
@@ -307,9 +301,7 @@ export default function Perfil({ navigation }) {
     isFallbackDoacoes,
   ]);
 
-  /* ============================
-   * render
-   * ============================ */
+  /*  render */
   return (
     <View style={s.container}>
       <Header />

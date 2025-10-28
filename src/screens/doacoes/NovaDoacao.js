@@ -33,7 +33,7 @@ function mapRegiaoToEnum(regiao) {
   return map[key] || "CENTRO";
 }
 
-// helpers para inferir nome/mime quando a plataforma não fornece
+// helpers
 function inferNameByUri(uri = "") {
   try {
     const p = uri.split("?")[0];
@@ -52,17 +52,16 @@ function inferMimeByUri(uri = "") {
 
 export default function NovaDoacao({ navigation }) {
   const { colors } = useRegionTheme();
-  const { regiao } = useRegiao(); // <- única fonte de verdade
+  const { regiao } = useRegiao(); 
 
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
-  const [telefone, setTelefone] = useState("");  // só dígitos
+  const [telefone, setTelefone] = useState("");  
   const [telValido, setTelValido] = useState(false);
   const [img, setImg] = useState(null);
   const [loading, setLoading] = useState(false);
   const [regionModal, setRegionModal] = useState(false);
 
-  // Escolher imagem
   const escolherImagem = useCallback(async () => {
     try {
       const cur = await ImagePicker.getMediaLibraryPermissionsAsync();
@@ -105,7 +104,6 @@ export default function NovaDoacao({ navigation }) {
     }
   }, []);
 
-  // Enviar doação
   const enviar = useCallback(async () => {
     if (loading) return;
     if (!titulo.trim() || !descricao.trim()) {
@@ -122,7 +120,7 @@ export default function NovaDoacao({ navigation }) {
         titulo,
         descricao,
         telefone,
-        zona: mapRegiaoToEnum(regiao), // <- mapeia NA HORA de enviar
+        zona: mapRegiaoToEnum(regiao), 
         imagemFile: img,
       });
       Alert.alert("Sucesso", "Doação criada!");
@@ -212,7 +210,6 @@ export default function NovaDoacao({ navigation }) {
             <Text style={{ fontWeight: "600", color: colors.primary, marginBottom: 6 }}>
               Região
             </Text>
-            {/* Exibe SEM state local; abre o modal para selecionar */}
             <TouchableOpacity
               onPress={() => setRegionModal(true)}
               activeOpacity={0.85}
@@ -286,10 +283,9 @@ export default function NovaDoacao({ navigation }) {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Modal de seleção de região */}
       <RegionSelector
         visible={regionModal}
-        onClose={() => setRegionModal(false)} // <- só fecha; o valor vem do contexto
+        onClose={() => setRegionModal(false)} 
       />
     </>
   );

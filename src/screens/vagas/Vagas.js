@@ -92,7 +92,7 @@ export default function Vagas({ navigation }) {
       setLoading(true);
       await carregar();
     } catch (e) {
-      dbg("❌ carregar vagas:", e?.message || e);
+      dbg(" carregar vagas:", e?.message || e);
       Alert.alert("Erro", "Não foi possível carregar as vagas.");
     } finally {
       setLoading(false);
@@ -108,7 +108,7 @@ export default function Vagas({ navigation }) {
       setRefreshing(true);
       await carregar();
     } catch (e) {
-      dbg("❌ refresh vagas:", e?.message || e);
+      dbg(" refresh vagas:", e?.message || e);
       Alert.alert("Erro", "Falha ao atualizar as vagas.");
     } finally {
       setRefreshing(false);
@@ -145,23 +145,22 @@ export default function Vagas({ navigation }) {
   // listeners de busca
   useEffect(() => {
     const s1 = DeviceEventEmitter.addListener("search:scope:vagas", ({ q, from }) => {
-      dbg("📥 escopo", q, "from:", from);
+      dbg(" escopo", q, "from:", from);
       aplicarBusca(q);
     });
     const s2 = DeviceEventEmitter.addListener("search:VagasHome", ({ q }) => {
-      dbg("📥 rota VagasHome", q);
+      dbg(" rota VagasHome", q);
       aplicarBusca(q);
     });
     const s3 = DeviceEventEmitter.addListener("app:search", ({ q, scope }) => {
       if (scope === "vagas") {
-        dbg("📥 global (scope ok)", q);
+        dbg(" global (scope ok)", q);
         aplicarBusca(q);
       }
     });
     return () => { s1.remove(); s2.remove(); s3.remove(); };
   }, [aplicarBusca]);
 
-  // se vier via navegação com params
   useEffect(() => {
     if (typeof route?.params?.q === "string") {
       aplicarBusca(route.params.q);

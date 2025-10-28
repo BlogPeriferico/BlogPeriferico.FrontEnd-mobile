@@ -1,4 +1,3 @@
-// src/services/auth.js
 import api from "./api";
 import {
   saveToken,
@@ -48,7 +47,6 @@ function extractNumericIdFromJwt(token) {
   return null;
 }
 
-/** LOGIN: lança erro com status em falha; limpa tokens em qualquer erro */
 export async function login({ email, senha }) {
   console.log("📤 [REQ] POST /auth/login");
   const resp = await api.post(
@@ -56,9 +54,8 @@ export async function login({ email, senha }) {
     { email, senha },
     { headers: { Authorization: undefined, "Content-Type": "application/json" } }
   );
-  console.log("✅ [RESP]", resp.status, "/auth/login");
+  console.log(" [RESP]", resp.status, "/auth/login");
 
-  // ❌ falhou → limpa token/uid antigos
   if (resp.status === 401) {
     await clearAuth();
     const err = new Error("E-mail ou senha inválidos.");
@@ -85,7 +82,6 @@ export async function login({ email, senha }) {
   await saveToken(token);
   console.log("🔑 token salvo");
 
-  // Resolve userId
   let userId = extractNumericIdFromObject(data);
   if (!userId && token) userId = extractNumericIdFromJwt(token);
   if (!userId) {
@@ -97,9 +93,9 @@ export async function login({ email, senha }) {
   }
   if (userId != null) {
     await saveUserId(userId);
-    console.log("👤 userId salvo:", userId);
+    console.log(" userId salvo:", userId);
   } else {
-    console.log("⚠️ não foi possível resolver userId automaticamente");
+    console.log(" não foi possível resolver userId automaticamente");
   }
 
   return data;
@@ -109,5 +105,4 @@ export async function logout() {
   await clearAuth();
 }
 
-// Reexporta utilidades se o app usar em outros lugares
 export { getToken, getUserId, clearAuth };

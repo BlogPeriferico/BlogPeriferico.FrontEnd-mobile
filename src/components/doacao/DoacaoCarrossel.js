@@ -91,7 +91,7 @@ export default function DoacaoCarrossel({ navigation }) {
 
   return (
     <View style={s.wrapper}>
-      {/* Conteúdo principal (clique abre detalhe) */}
+      {/* Conteúdo principal  */}
       <Pressable style={s.row} onPress={abrirDetalhe}>
         <View style={s.left}>
           <Text style={s.title} numberOfLines={1} ellipsizeMode="tail">
@@ -110,7 +110,6 @@ export default function DoacaoCarrossel({ navigation }) {
           )}
         </View>
 
-        {/* Setas laterais (20x20) */}
         <TouchableOpacity onPress={prev} style={[s.navBtn, s.navLeft]}>
           <Text style={s.navIcon}>‹</Text>
         </TouchableOpacity>
@@ -119,7 +118,6 @@ export default function DoacaoCarrossel({ navigation }) {
         </TouchableOpacity>
       </Pressable>
 
-      {/* CTA centralizado abaixo */}
       <View style={s.ctaRow}>
         <TouchableOpacity
           onPress={contato}
@@ -133,7 +131,6 @@ export default function DoacaoCarrossel({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Dots (80x6) */}
       <View style={s.dotsRow}>
         {itens.map((_, i) => (
           <View key={String(i)} style={[s.dot, i === index ? s.dotActive : s.dotInactive]} />

@@ -1,4 +1,3 @@
-// src/screens/vendas/DetalheVenda.jsx
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
   View, Text, Image, TouchableOpacity, ActivityIndicator, Alert,
@@ -294,7 +293,7 @@ export default function DetalheVenda({ route, navigation }) {
                   </Text>
                 </View>
 
-                {/* =============== Comentários =============== */}
+                {/* Comentários */}
                 <TouchableOpacity style={ns.comentarioToggle} onPress={() => setShowComentarios((prev) => !prev)}>
                   <Text style={ns.comentarioToggleText}>{comentarios.length} comentários</Text>
                   <Ionicons name={showComentarios ? "chevron-up" : "chevron-down"} size={18} color="#374151" />
@@ -358,7 +357,7 @@ export default function DetalheVenda({ route, navigation }) {
                     )}
                   </View>
                 )}
-                {/* =============== Comentários =============== */}
+                {/* Comentários */}
               </>
             )}
           </View>

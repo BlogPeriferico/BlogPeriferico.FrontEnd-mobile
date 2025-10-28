@@ -1,4 +1,3 @@
-// src/screens/news/DetalheNoticia.jsx
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -19,7 +18,7 @@ import { styles as s } from "../../styles/news/DetalheNoticiaStyles";
 import api from "../../services/api";
 import { getToken, getUserId } from "../../services/auth";
 
-/** ==== datas ==== */
+/**  datas  */
 function toDate(val) {
   if (!val) return null;
   if (val instanceof Date) return val;
@@ -58,7 +57,7 @@ function formatDatePt(v) {
   return `${dia}/${mes}/${ano}`;
 }
 
-/** ==== autor ==== */
+/**  autor  */
 function resolveUsuarioId(n) {
   if (!n) return null;
   const u = n.idUsuario;
@@ -74,7 +73,7 @@ function resolveAutorInline(n) {
   return n.nomeAutor || n.nomeUsuario || n.autorNome || n.usuario?.nome || null;
 }
 
-/** ==== conteúdo/descrição ==== */
+/**  conteúdo/descrição  */
 function sanitizeStr(x) {
   if (x == null) return "";
   const s = String(x).trim();
@@ -85,7 +84,7 @@ function stripHtml(x) {
   return x.replace(/<[^>]+>/g, "");
 }
 
-/** ==== mapa de usuários para hidratar foto e nome nos comentários/autor ==== */
+/*  mapa de usuários  */
 async function fetchUsuariosMap() {
   try {
     const { data } = await api.get("/usuarios/listar");
@@ -126,7 +125,7 @@ export default function DetalheNoticia({ route, navigation }) {
   const [erro, setErro] = useState("");
 
   const [autor, setAutor] = useState("Autor desconhecido");
-  const [autorFoto, setAutorFoto] = useState(null); // <-- FOTO DO AUTOR
+  const [autorFoto, setAutorFoto] = useState(null); 
   const [loadingAutor, setLoadingAutor] = useState(true);
 
   const [comentarios, setComentarios] = useState([]);
@@ -189,7 +188,7 @@ export default function DetalheNoticia({ route, navigation }) {
     return () => { live = false; };
   }, [noticiaParam, idParam, needsFetchFromParam]);
 
-  // Autor (nome + foto)
+  // Autor 
   useEffect(() => {
     let live = true;
     (async () => {

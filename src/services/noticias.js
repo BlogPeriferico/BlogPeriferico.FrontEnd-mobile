@@ -1,7 +1,6 @@
 import api from "./api";
 import { getToken, getUserId } from "./auth";
 
-/** LISTAGEM */
 export async function getTodasNoticias() {
   const { data } = await api.get("/noticias");
   const arr = Array.isArray(data) ? data : [];
@@ -31,7 +30,6 @@ function mapNoticiaFromDTO(n) {
   };
 }
 
-/** CRIAÇÃO via fetch (FormData) — envia idUsuario numérico */
 const BASE_URL = "https://backblog.azurewebsites.net";
 
 export async function criarNoticia({ titulo, texto, local, zona, imagemFile, token }) {
@@ -60,12 +58,12 @@ export async function criarNoticia({ titulo, texto, local, zona, imagemFile, tok
   }
 
   const headers = { Authorization: `Bearer ${authToken}` };
-  console.log("📤 [REQ] (fetch) POST /noticias");
+  console.log(" [REQ] (fetch) POST /noticias");
   const resp = await fetch(`${BASE_URL}/noticias`, { method: "POST", headers, body: form });
 
   if (!resp.ok) {
     const text = await safeReadText(resp);
-    console.log("❌ (fetch) status:", resp.status, text);
+    console.log(" (fetch) status:", resp.status, text);
     throw new Error(text || `HTTP ${resp.status}`);
   }
 
@@ -73,7 +71,6 @@ export async function criarNoticia({ titulo, texto, local, zona, imagemFile, tok
   return mapNoticiaFromDTO(json);
 }
 
-/** Helpers */
 function guessNameAndType(file) {
   let name = file.fileName || filenameFromUri(file.uri) || "upload.jpg";
   let type = file.mimeType || mimeFromName(name) || "image/jpeg";

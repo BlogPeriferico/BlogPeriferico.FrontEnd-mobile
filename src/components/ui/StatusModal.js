@@ -5,7 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 export default function StatusModal({
   visible = false,
   type = "info",
-  title = "",                 // ✅ agora recebido por props (com fallback)
+  title = "",               
   message = "",
   primaryText = "OK",
   onPrimary = () => {},
@@ -18,7 +18,7 @@ export default function StatusModal({
     error:   { bg: ["#F06E6E", "#B83B3B"], ring: "#FAD7D7", text: "#3E1010", icon: "❌" },
     info:    { bg: ["#9B9B9B", "#6F6F6F"], ring: "#E7E7E7", text: "#1E1E1E", icon: "ℹ️" },
   };
-  const palette = PALETTES[type] || PALETTES.info; // ✅ fallback seguro
+  const palette = PALETTES[type] || PALETTES.info; 
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onRequestClose}>
@@ -66,7 +66,7 @@ export default function StatusModal({
           <View style={{ gap: 10 }}>
             <TouchableOpacity activeOpacity={0.9} onPress={onPrimary}>
               <LinearGradient
-                colors={palette.bg}                      // ✅ sempre array válido
+                colors={palette.bg}                
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
                 style={{ paddingVertical: 12, borderRadius: 12, alignItems: "center" }}

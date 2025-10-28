@@ -1,4 +1,3 @@
-// src/utils/logFormData.js
 export function logFormData(fd) {
   try {
     const parts = fd?._parts || [];

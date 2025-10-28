@@ -1,7 +1,6 @@
 import React, { useMemo, useCallback, useState } from "react";
 import { TextInput, View, Text } from "react-native";
 
-/** --- Utils --- */
 const onlyDigits = (s = "") => String(s).replace(/\D/g, "").slice(0, 11);
 
 function formatCpf(raw = "") {
@@ -19,7 +18,7 @@ function formatCpf(raw = "") {
 
 function isRepeatedSequence(digits) {
   if (digits.length !== 11) return false;
-  return /^(\d)\1{10}$/.test(digits); // 00000000000, 11111111111, ...
+  return /^(\d)\1{10}$/.test(digits); 
 }
 
 function validateCpf(raw = "") {
@@ -27,14 +26,12 @@ function validateCpf(raw = "") {
   if (digits.length !== 11) return false;
   if (isRepeatedSequence(digits)) return false;
 
-  // Dígito 1
   let sum = 0;
   for (let i = 0; i < 9; i++) sum += Number(digits[i]) * (10 - i);
   let d1 = 11 - (sum % 11);
   if (d1 >= 10) d1 = 0;
   if (d1 !== Number(digits[9])) return false;
 
-  // Dígito 2
   sum = 0;
   for (let i = 0; i < 10; i++) sum += Number(digits[i]) * (11 - i);
   let d2 = 11 - (sum % 11);
@@ -72,10 +69,8 @@ export default function CPFInputBR({
   const masked = useMemo(() => formatCpf(raw), [raw]);
   const isValid = useMemo(() => validateCpf(raw), [raw]);
 
-  // Notifica validade (apenas quando mudar)
   React.useEffect(() => {
     if (typeof onValidChange === "function") onValidChange(isValid);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isValid, raw.length]);
 
   const handleChange = useCallback(
@@ -104,7 +99,7 @@ export default function CPFInputBR({
         importantForAutofill="no"
         autoComplete="off"
         textContentType="none"
-        maxLength={14} // 000.000.000-00
+        maxLength={14} 
         style={{
           backgroundColor: "#fff",
           borderWidth: 1.2,
@@ -126,5 +121,4 @@ export default function CPFInputBR({
   );
 }
 
-// Exporte utils se quiser usar fora
 export const cpfUtils = { onlyDigits, formatCpf, validateCpf };

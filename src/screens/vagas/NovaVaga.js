@@ -197,7 +197,7 @@ export default function NovaVaga({ navigation }) {
               }}
             />
 
-            {/* Região (igual ao de doação) */}
+            {/* Região */}
             <Text style={{ fontWeight: "600", color: colors.primary, marginBottom: 6 }}>
               Região
             </Text>
@@ -276,7 +276,7 @@ export default function NovaVaga({ navigation }) {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Modal de seleção de região (controla o contexto) */}
+      {/* Modal de seleção de região */}
       <RegionSelector visible={regionModal} onClose={() => setRegionModal(false)} />
     </>
   );

@@ -16,7 +16,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { styles as s } from "../../styles/vaga/DetalheVagaStyles";
 import { styles as listS } from "../../styles/vaga/VagasStyles";
-import { styles as ns } from "../../styles/news/DetalheNoticiaStyles"; // reaproveita estilos de comentários (notícias)
+import { styles as ns } from "../../styles/news/DetalheNoticiaStyles"; 
 import VagaCard from "../../components/vaga/VagaCard";
 import { useRegionTheme } from "../../utils/regionTheme";
 import api from "../../services/api";
@@ -120,9 +120,7 @@ export default function DetalheVaga({ route, navigation }) {
     }
   }, [whatsappHref]);
 
-  // ===============================
-  // Comentários (NOVO)
-  // ===============================
+  // Comentários 
   const [comentarios, setComentarios] = useState([]);
   const [loadingComentarios, setLoadingComentarios] = useState(false);
   const [showComentarios, setShowComentarios] = useState(false);
@@ -187,7 +185,7 @@ export default function DetalheVaga({ route, navigation }) {
       setNovoComentario("");
       setComentarios((prev) => [...prev, criado]);
     } catch (e) {
-      console.error("❌ Erro ao comentar:", e);
+      console.error(" Erro ao comentar:", e);
       Alert.alert(
         "Erro",
         e?.response?.data?.message || "Não foi possível enviar o comentário."
@@ -197,9 +195,7 @@ export default function DetalheVaga({ route, navigation }) {
     }
   }, [novoComentario, vaga?.id]);
 
-  // ===============================
   // Relacionadas
-  // ===============================
   const [relLoading, setRelLoading] = useState(true);
   const [relItens, setRelItens] = useState([]);
   const [relState, setRelState] = useState({ page: 1, pageSize: 6, hasMore: true });
@@ -296,7 +292,7 @@ export default function DetalheVaga({ route, navigation }) {
                   </Text>
                 </View>
 
-                {/* =============== Comentários =============== */}
+                {/* Comentários */}
                 <TouchableOpacity
                   style={ns.comentarioToggle}
                   onPress={() => setShowComentarios((prev) => !prev)}
@@ -315,7 +311,7 @@ export default function DetalheVaga({ route, navigation }) {
                   <View style={ns.comentariosContainer}>
                     <Text style={ns.comentariosTitulo}>Comentários</Text>
 
-                    {/* Input estilo YouTube */}
+                    {/* Input */}
                     <View style={ns.novoComentarioContainer}>
                       <View style={ns.avatarPlaceholder}>
                         <Ionicons name="person" size={20} color="#888" />
@@ -367,7 +363,7 @@ export default function DetalheVaga({ route, navigation }) {
                     )}
                   </View>
                 )}
-                {/* =============== Comentários =============== */}
+                {/* Comentários */}
               </>
             )}
           </View>

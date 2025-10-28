@@ -18,7 +18,7 @@ import { useRegionTheme } from "../../utils/regionTheme";
 import RegionSelector from "../../components/RegionSelector";
 import { useRegiao } from "../../contexts/RegionContext";
 
-// 🔹 Mapear nome da região para enum do backend
+//  Mapear nome da região 
 function mapRegiaoToEnum(regiao) {
   const map = {
     centro: "CENTRO",
@@ -35,7 +35,7 @@ function mapRegiaoToEnum(regiao) {
   return map[key] || "CENTRO";
 }
 
-// 🔹 Recuperar token de autenticação
+//  Recuperar token de autenticação
 async function getAuthToken() {
   const keysToTry = [
     "@auth/token",
@@ -65,7 +65,7 @@ export default function NovaNoticia({ navigation, route }) {
   const [loading, setLoading] = useState(false);
   const [regionModal, setRegionModal] = useState(false);
 
-  // 🔹 Escolher imagem
+  //  Escolher imagem
   const escolherImagem = useCallback(async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (perm.status !== "granted") {
@@ -87,7 +87,7 @@ export default function NovaNoticia({ navigation, route }) {
     }
   }, []);
 
-  // 🔹 Enviar notícia
+  //  Enviar notícia
   const enviar = useCallback(async () => {
     if (!titulo.trim() || !texto.trim()) {
       Alert.alert("Campos obrigatórios", "Informe pelo menos título e descrição.");
@@ -98,7 +98,7 @@ export default function NovaNoticia({ navigation, route }) {
       const tokenFromStorage = await getAuthToken();
       const token = tokenFromStorage || route?.params?.token || null;
 
-      console.log("📤 [REQ] POST /noticias");
+      console.log(" [REQ] POST /noticias");
       console.log("   body(dto):", JSON.stringify({ titulo, texto, local, zona }));
       console.log("   hasFile:", Boolean(img?.uri));
 
@@ -110,11 +110,11 @@ export default function NovaNoticia({ navigation, route }) {
         imagemFile: img,
         token,
       });
-      console.log("✅ criada:", resp?.id ?? "(sem id)");
+      console.log(" criada:", resp?.id ?? "(sem id)");
       Alert.alert("Sucesso", "Notícia criada!");
       navigation.goBack?.();
     } catch (e) {
-      console.log("❌ criarNoticia:", e?.message || "erro");
+      console.log(" criarNoticia:", e?.message || "erro");
       let msg = "Erro interno no servidor. Tente novamente mais tarde.";
       if (e?.message?.includes("401") || e?.message?.includes("403"))
         msg = "Sessão expirada ou sem permissão. Faça login novamente.";
@@ -177,7 +177,7 @@ export default function NovaNoticia({ navigation, route }) {
             )}
           </TouchableOpacity>
 
-          {/* 🔹 Formulário - sem fundo azul, seguindo cor da tela */}
+          {/*  Formulário */}
           <View style={{ padding: 4, marginTop: 15}}>
             <Text style={{ fontWeight: "600", color: colors.primary, marginBottom: 6 }}>
               Título
@@ -265,7 +265,7 @@ export default function NovaNoticia({ navigation, route }) {
               }}
             />
 
-            {/* 🔹 Botão de envio */}
+            {/*  Botão de envio */}
             <TouchableOpacity
               onPress={enviar}
               disabled={loading}
@@ -286,7 +286,7 @@ export default function NovaNoticia({ navigation, route }) {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* 🔹 Modal de seleção de região */}
+      {/*  Modal de seleção de região */}
       <RegionSelector
         visible={regionModal}
         onClose={() => {

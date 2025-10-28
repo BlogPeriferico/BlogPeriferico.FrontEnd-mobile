@@ -1,4 +1,3 @@
-// src/screens/doacoes/Doacoes.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -19,7 +18,7 @@ import DoacaoCarrossel from "../../components/doacao/DoacaoCarrossel";
 import { styles as listS } from "../../styles/doacao/DoacoesStyles";
 import { useRegionTheme } from "../../utils/regionTheme";
 import { getTodasDoacoes, paginaDoacoes } from "../../services/doacoes";
-import AddIcon from "../../assets/svgs/Add.svg"; // ⬅️ botão adicionar
+import AddIcon from "../../assets/svgs/Add.svg"; 
 
 const H_PADDING = 16;
 const GUTTER = 12;
@@ -51,12 +50,9 @@ export default function Doacoes({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // paginação (quando NÃO está buscando)
   const [pageState, setPageState] = useState({ page: 1, pageSize: 6, hasMore: true });
   const [itens, setItens] = useState([]);
   const [loadingMore, setLoadingMore] = useState(false);
-
-  // busca
   const [query, setQuery] = useState("");
   const [emBusca, setEmBusca] = useState(false);
   const [resultados, setResultados] = useState([]);
@@ -165,10 +161,10 @@ export default function Doacoes({ navigation }) {
         }
       >
         <View style={{ paddingTop: 12, paddingBottom: 8 }}>
-          {/* Carrossel logo no topo, com margem discreta */}
+          {/* Carrossel  */}
           <DoacaoCarrossel navigation={navigation} containerStyle={{ marginBottom: 12 }} />
 
-          {/* Título + Ação (igual outras seções) */}
+          {/* Título + Ação  */}
           <View style={listS.headerRow}>
             <Text style={[listS.tituloSecao, { color: colors.primary }]}>
               {emBusca ? "Resultados de Doações" : "Seleções de Doações"}

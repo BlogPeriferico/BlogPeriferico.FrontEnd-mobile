@@ -20,7 +20,6 @@ import { styles as s } from "../../styles/news/NoticiasStyles";
 import { getTodasNoticias, paginaNoticias } from "../../services/noticias";
 import { useRegionTheme } from "../../utils/regionTheme";
 
-/** DEBUG helper */
 const dbg = (...a) => console.log("🗞️[Noticias]", ...a);
 
 function normalizeStr(v) {
@@ -73,11 +72,11 @@ export default function Noticias({ navigation }) {
   // busca
   const [query, setQuery] = useState("");
   const [emBusca, setEmBusca] = useState(false);
-  const [resultados, setResultados] = useState([]); // lista filtrada quando emBusca = true
+  const [resultados, setResultados] = useState([]); 
 
   const carregar = useCallback(async () => {
-    const data = await getTodasNoticias(); // idealmente já vem ordenado desc
-    // ⚠️ Filtro por região — ajuste para zona se o seu backend usa 'zona':
+    const data = await getTodasNoticias(); 
+    //  Filtro por região — ajuste para zona se o seu backend usa 'zona':
     const filtradas = (data || []).filter(
       (n) =>
         String(n.regiao ?? n.zona ?? "").toLowerCase() === String(regiao ?? "").toLowerCase()
@@ -136,13 +135,12 @@ export default function Noticias({ navigation }) {
     }
   };
 
-  // --- BUSCA: recebe de 3 jeitos: route.params.q, DeviceEventEmitter ou programaticamente ---
   const aplicarBusca = useCallback(
     (q) => {
       const qStr = String(q || "").trim();
       setQuery(qStr);
       if (!qStr) {
-        // limpa busca -> volta para feed normal paginado
+        // limpa busca 
         setEmBusca(false);
         const pg = paginaNoticias(listaCompleta, { page: 1, pageSize: 5 });
         setItens(pg.items);
@@ -157,22 +155,18 @@ export default function Noticias({ navigation }) {
     [listaCompleta]
   );
 
-  // 1) evento global vindo do Header
   useEffect(() => {
     const sub = DeviceEventEmitter.addListener("app:search", ({ q }) => {
       aplicarBusca(q);
-      // opcional: scroll para topo
-      // scrollRef.current?.scrollTo({ y: 0, animated: true });
+      
     });
     return () => sub.remove();
   }, [aplicarBusca]);
 
-  // 2) se chegou por navegação com route.params.q
   useEffect(() => {
     const q = route?.params?.q;
     if (typeof q === "string") {
       aplicarBusca(q);
-      // limpa param para não re-aplicar no re-render
       try {
         navigation.setParams({ q: undefined });
       } catch {}
@@ -181,7 +175,7 @@ export default function Noticias({ navigation }) {
 
   const ultima = useMemo(() => (emBusca ? null : itens?.[0]), [emBusca, itens]);
   const restantes = useMemo(() => {
-    if (emBusca) return resultados; // em busca, a lista toda é “restantes”
+    if (emBusca) return resultados; 
     return itens?.length > 1 ? itens.slice(1) : [];
   }, [emBusca, itens, resultados]);
 
@@ -257,7 +251,7 @@ export default function Noticias({ navigation }) {
           </View>
         ) : (
           <>
-            {/* CARD GRANDE (última) — só no feed normal */}
+            {/* CARD GRANDE (última) */}
             {!emBusca && ultima ? (
               <TouchableOpacity
                 activeOpacity={0.9}
@@ -308,7 +302,7 @@ export default function Noticias({ navigation }) {
               </TouchableOpacity>
             ))}
 
-            {/* BOTÃO VER MAIS — só quando NÃO está buscando */}
+            {/* BOTÃO VER MAIS */}
             {!emBusca && pageState.hasMore ? (
               <TouchableOpacity
                 onPress={handleVerMais}

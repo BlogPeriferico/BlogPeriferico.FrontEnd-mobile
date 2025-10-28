@@ -21,26 +21,19 @@ export function paginaDoacoes(listaCompleta, { page = 1, pageSize = 5 } = {}) {
   return { items, hasMore: end < listaCompleta.length };
 }
 
-/** =========================
- *  CRIAÇÃO (via fetch)
- *  Alinhado ao controller:
- *   - @RequestParam("dto") String dtoJson
- *   - @RequestPart("file") MultipartFile file (opcional)
- *   - Auth: Bearer (roles USUARIO/ADMINISTRADOR)
- *  ========================= */
+
 export async function criarDoacao({
   titulo,
   descricao,
   telefone,
   zona,
   imagemFile,
-  categoria, // opcional
+  categoria, 
   token,
 }) {
   const authToken = token || (await getToken());
   if (!authToken) throw new Error("401 - Sem token. Faça login novamente.");
 
-  // dto como STRING (não enviar idUsuario — backend usa Authentication)
   const dto = {
     titulo: (titulo || "").trim(),
     descricao: (descricao || "").trim(),
@@ -50,7 +43,7 @@ export async function criarDoacao({
   };
 
   const form = new FormData();
-  form.append("dto", JSON.stringify(dto)); // ✅ casa com @RequestParam("dto")
+  form.append("dto", JSON.stringify(dto)); 
 
   if (imagemFile?.uri) {
     const uri =
@@ -63,7 +56,7 @@ export async function criarDoacao({
 
     const type = imagemFile.mimeType || mimeFromName(name) || "image/jpeg";
 
-    form.append("file", { uri, name, type }); // ✅ casa com @RequestPart("file")
+    form.append("file", { uri, name, type }); 
   }
 
   console.log("📤 [REQ] (fetch) POST /doacoes");
@@ -74,12 +67,11 @@ export async function criarDoacao({
     resp = await fetch(`${BASE_URL}/doacoes`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${authToken}`, // ⚠️ não setar Content-Type
+        Authorization: `Bearer ${authToken}`, 
       },
       body: form,
     });
   } catch (netErr) {
-    // erro de rede (sem resposta HTTP)
     const diag = {
       status: 0,
       url: `${BASE_URL}/doacoes`,
@@ -89,7 +81,7 @@ export async function criarDoacao({
       kind: "no-response",
       raw: String(netErr?.message || netErr),
     };
-    console.log("🧨 DIAG (fetch/doacoes):", diag);
+    console.log(" DIAG (fetch/doacoes):", diag);
     throw new Error(diag.human);
   }
 
@@ -97,21 +89,18 @@ export async function criarDoacao({
 
   if (!resp.ok) {
     const diag = formatFetchError(resp, text);
-    console.log("🧨 DIAG (fetch/doacoes):", diag);
+    console.log(" DIAG (fetch/doacoes):", diag);
     throw new Error(diag.human);
   }
 
   try {
     return mapDoacaoFromDTO(JSON.parse(text));
   } catch {
-    // Se backend não retornou JSON, devolve estrutura mínima
     return mapDoacaoFromDTO({});
   }
 }
 
-/** =========================
- *  Helpers de mapeamento
- *  ========================= */
+/* Helpers de mapeamento */
 function mapDoacaoFromDTO(d = {}) {
   return {
     id: d?.id != null ? String(d.id) : "",
@@ -124,9 +113,7 @@ function mapDoacaoFromDTO(d = {}) {
   };
 }
 
-/** =========================
- *  Helpers utilitários (self-contained)
- *  ========================= */
+/* Helpers utilitários */
 function filenameFromUri(uri = "") {
   try {
     const p = uri.split("?")[0];
@@ -192,7 +179,6 @@ async function safeReadText(resp) {
   }
 }
 
-// Debug bonitinho do FormData no RN
 function logFormData(fd) {
   try {
     const parts = fd?._parts || [];

@@ -8,10 +8,6 @@ import DoacaoStack from "./DoacaoStack";
 import VagasStack from "./VagasStack";
 import SobreStack from "./SobreStack";
 import VendasStack from "./VendasStack";
-
-// ❌ REMOVA esta linha se ela existir
-// import PerfilStack from "./PerfilStack";
-
 import IconNews from "../assets/svgs/tab/Jornal.svg";
 import IconHandHeart from "../assets/svgs/tab/MaoCoracao.svg";
 import IconStore from "../assets/svgs/tab/Loja.svg";

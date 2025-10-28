@@ -1,4 +1,3 @@
-// src/screens/Vendas/index.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity, ActivityIndicator,
@@ -19,7 +18,7 @@ const H_PADDING = 16;
 const GUTTER = 12;
 const CARD_W = (SCREEN_W - H_PADDING * 2 - GUTTER) / 2;
 
-const dbg = (...a) => console.log("🛒[Vendas]", ...a);
+const dbg = (...a) => console.log("[Vendas]", ...a);
 
 const norm = (x) => String(x ?? "").toLowerCase().trim();
 function matchVenda(item, q) {
@@ -119,7 +118,7 @@ export default function Vendas({ navigation }) {
 
   useEffect(() => {
     const s1 = DeviceEventEmitter.addListener("search:scope:vendas", ({ q, from }) => {
-      dbg("📥 escopo", q, "from:", from); aplicarBusca(q);
+      dbg(" escopo", q, "from:", from); aplicarBusca(q);
     });
     const s2 = DeviceEventEmitter.addListener("app:search", ({ q, scope }) => {
       if (scope === "vendas") { dbg("📥 global (scope ok)", q); aplicarBusca(q); }
@@ -148,7 +147,6 @@ export default function Vendas({ navigation }) {
         contentContainerStyle={[s.scroll, { paddingHorizontal: H_PADDING, paddingTop: 12 }]}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} tintColor={colors.primary} />}
       >
-        {/* carrossel opcional que você já usa */}
         <DoacaoCarrossel navigation={navigation} containerStyle={{ marginBottom: 18 }} />
 
         <View style={s.headerRow}>

@@ -1,13 +1,10 @@
-// src/services/vagas.js
 import { Platform } from "react-native";
 import api from "./api";
 import { getToken } from "./auth";
 
 const BASE_URL = "https://backblog.azurewebsites.net";
 
-/** =========================
- *  LISTAGEM / PAGINAÇÃO
- *  ========================= */
+
 export async function getTodasVagas() {
   const { data } = await api.get("/vagas");
   const arr = Array.isArray(data) ? data : [];
@@ -39,18 +36,17 @@ export async function criarVaga({
   const authToken = token || (await getToken());
   if (!authToken) throw new Error("401 - Sem token. Faça login novamente.");
 
-  // sempre envia só dígitos (evita nulls por validação no back)
   const soDigitos = (x = "") => String(x).replace(/\D/g, "");
 
   const dto = {
     titulo: (titulo || "").trim(),
     descricao: (descricao || "").trim(),
-    telefone: soDigitos(telefone || ""), // ✅ garante que vai no DTO
+    telefone: soDigitos(telefone || ""), 
     zona: (zona || "CENTRO").toUpperCase(),
   };
 
   const form = new FormData();
-  form.append("dto", JSON.stringify(dto)); // ✅ casa com @RequestParam("dto")
+  form.append("dto", JSON.stringify(dto)); 
 
   if (imagemFile?.uri) {
     const uri =
@@ -63,18 +59,18 @@ export async function criarVaga({
 
     const type = imagemFile.mimeType || mimeFromName(name) || "image/jpeg";
 
-    form.append("file", { uri, name, type }); // ✅ casa com @RequestPart("file")
+    form.append("file", { uri, name, type }); 
   }
 
   console.log("📤 [REQ] (fetch) POST /vagas");
-  logFormData(form); // ✅ debug: garante que 'telefone' foi junto dentro do dto
+  logFormData(form); 
 
   let resp;
   try {
     resp = await fetch(`${BASE_URL}/vagas`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${authToken}`, // ⚠️ não setar Content-Type
+        Authorization: `Bearer ${authToken}`, 
       },
       body: form,
     });
@@ -88,7 +84,7 @@ export async function criarVaga({
       kind: "no-response",
       raw: String(netErr?.message || netErr),
     };
-    console.log("🧨 DIAG (fetch/vagas):", diag);
+    console.log(" DIAG (fetch/vagas):", diag);
     throw new Error(diag.human);
   }
 
@@ -96,7 +92,7 @@ export async function criarVaga({
 
   if (!resp.ok) {
     const diag = formatFetchError(resp, text);
-    console.log("🧨 DIAG (fetch/vagas):", diag);
+    console.log(" DIAG (fetch/vagas):", diag);
     throw new Error(diag.human);
   }
 
@@ -107,9 +103,7 @@ export async function criarVaga({
   }
 }
 
-/** =========================
- *  Helpers de mapeamento
- *  ========================= */
+
 function mapVagaFromDTO(d = {}) {
   return {
     id: d?.id != null ? String(d.id) : "",
@@ -123,9 +117,7 @@ function mapVagaFromDTO(d = {}) {
   };
 }
 
-/** =========================
- *  Helpers utilitários
- *  ========================= */
+
 function filenameFromUri(uri = "") {
   try {
     const p = uri.split("?")[0];
@@ -191,7 +183,6 @@ async function safeReadText(resp) {
   }
 }
 
-// Debug bonitinho do FormData no RN
 function logFormData(fd) {
   try {
     const parts = fd?._parts || [];
