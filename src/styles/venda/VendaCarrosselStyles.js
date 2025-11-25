@@ -10,11 +10,10 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // 🔧 aqui estava o problema: antes estava justifyContent: "center"
   page: {
     alignItems: "center",
-    justifyContent: "flex-start", // fica grudado no topo da área do carrossel
-    paddingTop: 4,                // um respiro pra não colar no topo
+    justifyContent: "flex-start",
+    paddingTop: 4,
     paddingBottom: 4,
   },
 

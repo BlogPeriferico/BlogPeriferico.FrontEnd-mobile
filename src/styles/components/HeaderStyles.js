@@ -1,4 +1,3 @@
-// src/styles/components/HeaderStyles.js
 import { StyleSheet, Dimensions, StatusBar, Platform } from "react-native";
 const { width, height } = Dimensions.get("window");
 
@@ -7,12 +6,10 @@ export const styles = StyleSheet.create({
   statusbarBackground: {
     backgroundColor: "#fff",
   },
-  // spacer apenas para Android (StatusBar translúcida)
   statusBarSpacer: {
-    height: Platform.OS === "android" ? (StatusBar.currentHeight || 0) : 0,
+    height: Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0,
     backgroundColor: "#fff",
   },
-  // em iOS, um SafeAreaView vazio pinta o topo (notch) de branco
   safeAreaTopIOS: {
     backgroundColor: "#fff",
   },
@@ -20,30 +17,45 @@ export const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: "#fff",
     zIndex: 10,
+    paddingBottom: 4,
   },
 
   // ===== Header (topo) =====
   headerContainer: {
     width: "100%",
-    height: 60,
-    backgroundColor: "#fff",
+    height: 70,
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
+    paddingBottom: 6,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    elevation: 4,
 
-    // sombra leve em vez de borda
-    shadowColor: "#fff",
-    shadowOpacity: 0.0000005,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
+
+  // Barrinha colorida embaixo do header
+  headerAccentWrapper: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: -4,
+    marginBottom: 8,
+  },
+  headerAccentBar: {
+    width: "60%",
+    height: 3,
+    borderRadius: 999,
+    backgroundColor: "#111827",
   },
 
   // === Hamburguer ===
   hamburguer: {
-    width: 28,
-    height: 24,
+    width: 32,
+    height: 28,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -51,8 +63,8 @@ export const styles = StyleSheet.create({
     position: "absolute",
     width: 22,
     height: 2.4,
-    borderRadius: 2,
-    backgroundColor: "#001C30",
+    borderRadius: 999,
+    backgroundColor: "#020617",
   },
 
   // === Centro (título/busca) ===
@@ -64,38 +76,37 @@ export const styles = StyleSheet.create({
   },
   titulo: {
     fontSize: 22,
-    fontWeight: "bold",
+    fontWeight: "800",
     color: "#001C30",
+    letterSpacing: 0.3,
   },
 
-  // caixa da busca: linha + centralizado vertical
   searchBox: {
     position: "absolute",
     left: 0,
     right: 0,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: "#f1f1f1",
+    height: 42,
+    borderRadius: 999,
+    backgroundColor: "#F3F4F6",
     overflow: "hidden",
     paddingHorizontal: 10,
+    borderWidth: 1,
 
     flexDirection: "row",
     alignItems: "center",
   },
 
-  // input ocupa a largura e alinha vertical
   inputBusca: {
     flex: 1,
     height: "100%",
-    fontSize: 16,
-    color: "#000",
+    fontSize: 15,
+    color: "#0F172A",
     paddingVertical: 0,
     includeFontPadding: false,
     paddingRight: 8,
     textAlignVertical: "center",
   },
 
-  // botão do X alinhado
   clearBtn: {
     height: 40,
     justifyContent: "center",
@@ -106,54 +117,116 @@ export const styles = StyleSheet.create({
   // ===== Drawer / Overlay =====
   fullscreenModal: {
     position: "absolute",
-    top: 0,
+    // respeita a área da status bar
+    top: Platform.OS === "android" ? (StatusBar.currentHeight || 0) : 0,
     left: 0,
     width: "100%",
-    height,
+    height:
+      height - (Platform.OS === "android" ? (StatusBar.currentHeight || 0) : 0),
     zIndex: 999,
     flexDirection: "row",
   },
+
   modalLateral: {
     position: "absolute",
     top: 0,
     left: 0,
     bottom: 0,
-    width: Math.min(0.78 * width, 320),
-    backgroundColor: "#fff",
-    paddingTop: 20,
-    paddingHorizontal: 16,
-    elevation: 10,
+    width: Math.min(0.8 * width, 330),
+    backgroundColor: "#FFFFFF",
+    paddingTop: 16,
+    paddingHorizontal: 18,
+
+    borderTopRightRadius: 24,
+    borderBottomRightRadius: 24,
+
     shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 12,
+
     zIndex: 1000,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: "rgba(15,23,42,0.40)",
     zIndex: 999,
   },
-  modalItem: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#001C30",
-    paddingVertical: 14,
-    borderBottomColor: "rgba(0, 0, 0, 0.06)",
-    borderBottomWidth: 0.5,
-  },
+
   botaoFechar: {
     alignSelf: "flex-end",
     padding: 8,
   },
 
-  /* ——— APENAS conteúdo do menu (drawer) abaixo ——— */
+  // Header do drawer (avatar + textos)
+  drawerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  drawerAvatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 999,
+    backgroundColor: "#EEF2FF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  drawerAvatarText: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#1E293B",
+  },
+  drawerAvatarImage: {
+    width: 42,
+    height: 42,
+    borderRadius: 999,
+    marginRight: 12,
+  },
+  drawerHeaderTextWrap: {
+    flex: 1,
+  },
+  drawerHeaderTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
+  drawerHeaderSubtitle: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+
+  // Itens do drawer
+  drawerItemRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    borderBottomColor: "rgba(15, 23, 42, 0.04)",
+    borderBottomWidth: 0.7,
+  },
+  drawerItemLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 10,
+  },
+  drawerItemLabel: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#0F172A",
+  },
+
+  // Título da seção "Localização"
   drawerSectionTitle: {
     fontSize: 12,
     color: "#6B7280",
     fontWeight: "600",
     letterSpacing: 0.3,
-    marginTop: 10,
+    marginTop: 14,
     marginBottom: 8,
   },
 
@@ -167,9 +240,8 @@ export const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6EAF2",
+    borderColor: "#E5E7EB",
 
-    // “card” sutil
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 6,
@@ -180,7 +252,7 @@ export const styles = StyleSheet.create({
   drawerRegionLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    columnGap: 10,
   },
   drawerRegionIconWrap: {
     width: 34,
@@ -199,7 +271,7 @@ export const styles = StyleSheet.create({
   drawerRegionRight: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    columnGap: 8,
   },
   drawerRegionChip: {
     paddingHorizontal: 10,
@@ -218,6 +290,6 @@ export const styles = StyleSheet.create({
   },
 
   drawerDivider: {
-    height: 12,
+    height: 16,
   },
 });

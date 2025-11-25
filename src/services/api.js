@@ -6,7 +6,7 @@ import { DeviceEventEmitter } from "react-native";
 const DEBUG_API = true;
 
 const api = axios.create({
-  baseURL: "https://backblog.azurewebsites.net",
+  baseURL: "https://backbl0g.azurewebsites.net",
   timeout: 15000,
   headers: { Accept: "application/json" },
   validateStatus: () => true,

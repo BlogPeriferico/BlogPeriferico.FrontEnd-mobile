@@ -4,12 +4,16 @@ import { styles as s } from "../../styles/doacao/DoacaoCardStyles";
 
 export default function DoacaoCard({ item, onPress, regiao, style }) {
   const doador =
-    item?.doador?.nome || item?.usuarioNome || item?.autorNome || item?.telefone || null;
+    item?.doador?.nome ||
+    item?.usuarioNome ||
+    item?.autorNome ||
+    item?.telefone ||
+    null;
 
   return (
     <TouchableOpacity
       activeOpacity={0.85}
-      onPress={() => onPress?.(item)}  
+      onPress={onPress}
       style={[s.card, style]}
       accessibilityRole="button"
       accessibilityLabel={`Abrir doação ${item?.titulo || "sem título"}`}
@@ -17,7 +21,11 @@ export default function DoacaoCard({ item, onPress, regiao, style }) {
       <View style={s.inner}>
         <View style={s.cardImageWrap}>
           {item?.imagem ? (
-            <Image source={{ uri: item.imagem }} style={s.cardImage} resizeMode="cover" />
+            <Image
+              source={{ uri: item.imagem }}
+              style={s.cardImage}
+              resizeMode="cover"
+            />
           ) : (
             <View style={[s.cardImage, { backgroundColor: "#F3F4F6" }]} />
           )}

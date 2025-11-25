@@ -16,7 +16,11 @@ export default function VagaCard({ item, onPress, regiao, style }) {
       <View style={s.inner}>
         <View style={s.cardImageWrap}>
           {item?.imagem ? (
-            <Image source={{ uri: item.imagem }} style={s.cardImage} resizeMode="cover" />
+            <Image
+              source={{ uri: item.imagem }}
+              style={s.cardImage}
+              resizeMode="cover"
+            />
           ) : (
             <View style={[s.cardImage, { backgroundColor: "#F3F4F6" }]} />
           )}

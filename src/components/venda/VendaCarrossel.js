@@ -1,4 +1,4 @@
-// src/components/doacao/DoacaoCarrossel.js
+// src/components/venda/VendaCarrossel.js
 import React, { useEffect, useState, useRef } from "react";
 import {
   View,
@@ -12,11 +12,12 @@ import {
   Linking,
   Animated,
 } from "react-native";
-import { styles as s } from "../../styles/doacao/DoacaoCarrosselStyles";
+
+import { styles as s } from "../../styles/venda/VendaCarrosselStyles";
 import { useRegionTheme } from "../../utils/regionTheme";
 import api from "../../services/api";
 
-const FIXED_IDS = [2, 3, 4];
+const FIXED_IDS = [2, 3, 4]; // ⬅️ igual doação, fixo
 const { width: SCREEN_W } = Dimensions.get("window");
 
 function normalizePhone(tel) {
@@ -30,12 +31,24 @@ function waLink(tel, titulo) {
   const n = normalizePhone(tel);
   if (!n) return null;
   const msg = encodeURIComponent(
-    `Olá! Vi sua doação${titulo ? `: "${titulo}"` : ""} no Blog Periférico e gostaria de saber mais.`
+    `Olá! Vi sua venda${titulo ? `: "${titulo}"` : ""} no Blog Periférico e gostaria de saber mais.`
   );
   return `https://wa.me/${n}?text=${msg}`;
 }
 
-export default function DoacaoCarrossel({ navigation, containerStyle }) {
+const fmtBRL = (n) => {
+  if (n == null || isNaN(n)) return "";
+  try {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(Number(n));
+  } catch {
+    return `R$ ${Number(n).toFixed(2)}`.replace(".", ",");
+  }
+};
+
+export default function VendaCarrossel({ navigation, containerStyle }) {
   const { colors } = useRegionTheme();
   const [loading, setLoading] = useState(true);
   const [itens, setItens] = useState([]);
@@ -47,21 +60,29 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
     (async () => {
       try {
         const reqs = FIXED_IDS.map((id) =>
-          api.get(`/doacoes/${id}`).then((r) => r.data).catch(() => null)
+          api
+            .get(`/vendas/${id}`)
+            .then((r) => r.data)
+            .catch(() => null)
         );
+
         const all = (await Promise.all(reqs)).filter(Boolean);
         if (live) setItens(all);
+      } catch (e) {
+        console.log("❌ [VendaCarrossel] erro:", e?.message || e);
+        if (live) setItens([]);
       } finally {
         if (live) setLoading(false);
       }
     })();
+
     return () => {
       live = false;
     };
   }, []);
 
   const abrirDetalhe = (item) => {
-    navigation.navigate("DetalheDoacao", { id: item.id, doacao: item });
+    navigation.navigate("DetalheVenda", { id: item.id, venda: item });
   };
 
   const contato = async (item) => {
@@ -81,7 +102,7 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
 
   if (!itens.length) return null;
 
-  const CARD_WIDTH = SCREEN_W * 0.9; // largura do card dentro da página
+  const CARD_WIDTH = SCREEN_W * 0.92;
 
   return (
     <View style={[s.container, containerStyle]}>
@@ -96,12 +117,10 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
         contentContainerStyle={{ alignItems: "stretch" }}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          {
-            useNativeDriver: false, // 👈 IMPORTANTE: false pq animamos width/opacity
-          }
+          { useNativeDriver: false }
         )}
         scrollEventThrottle={16}
-        renderItem={({ item, index }) => (
+        renderItem={({ item }) => (
           <View style={[s.page, { width: SCREEN_W }]}>
             <Pressable
               style={[s.cardShadow, { width: CARD_WIDTH }]}
@@ -110,8 +129,13 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
               <View style={s.row}>
                 <View style={s.left}>
                   <Text style={s.title} numberOfLines={2}>
-                    {item.titulo || "Doação"}
+                    {item.titulo || "Venda"}
                   </Text>
+                  {!!item.valor && (
+                    <Text style={s.price} numberOfLines={1}>
+                      {fmtBRL(item.valor)}
+                    </Text>
+                  )}
                   <Text style={s.subtitle} numberOfLines={3}>
                     {item.descricao || "Sem descrição disponível."}
                   </Text>
@@ -135,7 +159,6 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
                 </View>
               </View>
 
-              {/* CTA */}
               <View style={s.ctaRow}>
                 <TouchableOpacity
                   onPress={() => contato(item)}
@@ -151,7 +174,7 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
                       { color: colors.onPrimary || "#FFF" },
                     ]}
                   >
-                    ENTRE EM CONTATO
+                    FALAR COM VENDEDOR
                   </Text>
                   <Text
                     style={[
@@ -168,7 +191,6 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
         )}
       />
 
-      {/* Dots animados */}
       <View style={s.dotsRow}>
         {itens.map((_, i) => {
           const inputRange = [

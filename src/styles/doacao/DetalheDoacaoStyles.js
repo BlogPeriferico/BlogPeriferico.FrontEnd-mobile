@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
   // CAPA
   headerImageWrap: {
     width: "100%",
-    height: 390,
+    height: 400,
     backgroundColor: "#E5E7EB",
   },
   headerImage: {

@@ -16,11 +16,13 @@ import { useRegionTheme } from "../../utils/regionTheme";
 import api from "../../services/api";
 import { getUserId } from "../../services/auth";
 
-import NoticiaCard from "../../components/quebradainforma/NewsCardItem";
+// cards
+import NewsCardItem from "../../components/quebradainforma/NewsCardItem";
 import DoacaoCard from "../../components/doacao/DoacaoCard";
 import VendaCard from "../../components/venda/VendaCard";
 import VagaCard from "../../components/vaga/VagaCard";
 
+// serviços de listagem
 import { getTodasNoticias } from "../../services/noticias";
 import { getTodasDoacoes } from "../../services/doacoes";
 import { getTodasVendas } from "../../services/vendas";
@@ -28,10 +30,7 @@ import { getTodasVagas } from "../../services/vagas";
 
 import AvatarPlaceholder from "../../assets/svgs/avatar-placeholder.svg";
 
-/* 
- * Helpers pra ID do dono
- *  */
-
+/* Helpers pra ID do dono */
 function normId(x) {
   const n = Number(x);
   return Number.isNaN(n) ? null : n;
@@ -40,7 +39,7 @@ function normId(x) {
 function resolveIdUsuarioFromItem(it) {
   if (!it) return null;
 
-  // vendas / vagas normalmente
+  // vendas / vagas / notícias (idUsuario direto)
   if (it.idUsuario != null && typeof it.idUsuario === "object") {
     return normId(it.idUsuario.id);
   }
@@ -98,11 +97,9 @@ export default function Perfil({ navigation }) {
   const [minhasVendas, setMinhasVendas] = useState([]);
   const [minhasVagas, setMinhasVagas] = useState([]);
 
-  // flags pra saber se a lista é “realmente minhas” ou “fallback tudo”
   const [isFallbackNoticias, setIsFallbackNoticias] = useState(false);
   const [isFallbackDoacoes, setIsFallbackDoacoes] = useState(false);
 
-  // debug helper p/ console
   const logLista = (label, arr, uidNum) => {
     console.log(
       `👀 [Perfil] ${label} total=${arr.length} | uid=${uidNum}`,
@@ -117,9 +114,7 @@ export default function Perfil({ navigation }) {
     );
   };
 
-  /* 
-   * carrega dados do usuário
-   *  */
+  /* carrega dados do usuário */
   const loadUser = useCallback(async () => {
     console.log("🔎 [Perfil] loadUser() start");
 
@@ -149,9 +144,7 @@ export default function Perfil({ navigation }) {
     }
   }, []);
 
-  /* 
-   * carrega listas e aplica filtro
-   *  */
+  /* carrega listas e aplica filtro */
   const loadLists = useCallback(async (uidNum) => {
     console.log("🔎 [Perfil] loadLists() uidNum=", uidNum);
 
@@ -214,7 +207,6 @@ export default function Perfil({ navigation }) {
     const noticiasCalc = filtraSmart(arrN, "noticias");
     const doacoesCalc = filtraSmart(arrD, "doacoes");
 
-    // vendas e vagas 
     const minhasVendasCalc = arrV.filter(
       (it) => resolveIdUsuarioFromItem(it) === uidNum
     );
@@ -236,7 +228,7 @@ export default function Perfil({ navigation }) {
     setIsFallbackDoacoes(doacoesCalc.fallback);
   }, []);
 
-  /*  ciclo de carregamento inicial  */
+  /* ciclo de carregamento inicial */
   const loadAll = useCallback(async () => {
     try {
       setLoading(true);
@@ -245,7 +237,12 @@ export default function Perfil({ navigation }) {
       const uidRaw = await getUserId();
       const uidNum = normId(uidRaw);
 
-      console.log("🔁 [Perfil] depois loadUser(), uidRaw=", uidRaw, "uidNum=", uidNum);
+      console.log(
+        "🔁 [Perfil] depois loadUser(), uidRaw=",
+        uidRaw,
+        "uidNum=",
+        uidNum
+      );
 
       await loadLists(uidNum);
     } finally {
@@ -272,14 +269,13 @@ export default function Perfil({ navigation }) {
     }
   }, [loadLists, loadUser]);
 
-  /* 
-   * memo pro header
-   *  */
-  const nomeUsuario = useMemo(() => user?.nome || "Seu nome", [user?.nome]);
+  const nomeUsuario = useMemo(
+    () => user?.nome || "Seu nome",
+    [user?.nome]
+  );
   const bioUsuario = useMemo(
     () =>
-      user?.bio ||
-      "Perfil do autor. Edite sua bio para aparecer aqui.",
+      user?.bio || "Perfil do autor. Edite sua bio para aparecer aqui.",
     [user?.bio]
   );
 
@@ -301,7 +297,6 @@ export default function Perfil({ navigation }) {
     isFallbackDoacoes,
   ]);
 
-  /*  render */
   return (
     <View style={s.container}>
       <Header />
@@ -445,20 +440,19 @@ export default function Perfil({ navigation }) {
             {tab === "noticias" &&
               (minhasNoticias.length ? (
                 minhasNoticias.map((n) => (
-                  <NoticiaCard
-                    key={n.id}
-                    item={n}
-                    onPress={() =>
-                      navigation.navigate("DetalheNoticia", {
-                        id: n.id,
-                        noticia: n,
-                      })
-                    }
-                    style={s.cardSpacer}
-                  />
+                  <View key={n.id} style={s.cardSpacer}>
+                    <NewsCardItem
+                      noticia={n}
+                      onPress={() =>
+                        navigation.navigate("DetalheNoticia", {
+                          id: n.id,
+                          noticia: n,
+                        })
+                      }
+                    />
+                  </View>
                 ))
               ) : (
-                // só mostra "você não publicou" se NÃO estamos em fallback
                 !isFallbackNoticias && (
                   <Text style={s.emptyText}>
                     Você ainda não publicou notícias.
@@ -473,13 +467,13 @@ export default function Perfil({ navigation }) {
                   <DoacaoCard
                     key={d.id}
                     item={d}
-                    onPress={() =>
+                    style={s.cardSpacer}
+                    onPress={(selected) =>
                       navigation.navigate("DetalheDoacao", {
-                        id: d.id,
-                        doacao: d,
+                        id: (selected && selected.id) || d.id,
+                        doacao: selected || d,
                       })
                     }
-                    style={s.cardSpacer}
                   />
                 ))
               ) : (
@@ -497,13 +491,13 @@ export default function Perfil({ navigation }) {
                   <VendaCard
                     key={v.id}
                     item={v}
+                    style={s.cardSpacer}
                     onPress={() =>
                       navigation.navigate("DetalheVenda", {
                         id: v.id,
                         venda: v,
                       })
                     }
-                    style={s.cardSpacer}
                   />
                 ))
               ) : (
@@ -519,13 +513,13 @@ export default function Perfil({ navigation }) {
                   <VagaCard
                     key={vaga.id}
                     item={vaga}
+                    style={s.cardSpacer}
                     onPress={() =>
                       navigation.navigate("DetalheVaga", {
                         id: vaga.id,
                         vaga,
                       })
                     }
-                    style={s.cardSpacer}
                   />
                 ))
               ) : (
