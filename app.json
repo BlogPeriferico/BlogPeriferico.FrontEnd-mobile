@@ -1,32 +1,48 @@
 {
   "expo": {
-    "name": "blog-periferico",
+    "name": "Blog Periférico",
     "slug": "blog-periferico",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+
+    "icon": "./assets/blog-icon.jpg",
+
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/blog-icon.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.blogperiferico.app"
     },
+
     "android": {
+      "package": "com.blogperiferico.app",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/blog-icon.jpg",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true
     },
+
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/blog-icon.jpg"
     },
+
     "plugins": [
       "expo-font"
-    ]
+    ],
+
+    "extra": {
+      "eas": {
+        "projectId": "2bb9839b-583e-4f03-8ba9-0c9e2f02cd5a"
+      }
+    }
   }
 }
