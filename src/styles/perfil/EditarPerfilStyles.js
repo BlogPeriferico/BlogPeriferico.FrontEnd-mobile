@@ -11,7 +11,7 @@ export const styles = StyleSheet.create({
 
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.20)", // leve escurecida na imagem
+    backgroundColor: "rgba(15,23,42,0.45)", // escurece de leve e puxa pro azul
   },
 
   scrollContent: {
@@ -27,58 +27,84 @@ export const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 4,
+    columnGap: 12,
+  },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 999,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  headerTextWrap: {
+    flex: 1,
   },
   titulo: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: "800",
-    color: "#111827",
-    marginRight: 24, // compensa o espaço da seta
+    color: "#F9FAFB",
+    letterSpacing: 0.3,
   },
   subtitulo: {
-    width: "100%",
-    textAlign: "center",
-    fontSize: 14,
-    color: "#6B7280",
-    marginBottom: 24,
+    marginTop: 2,
+    fontSize: 13,
+    color: "rgba(209,213,219,0.95)",
   },
 
   // card principal
   cardWrapper: {
     width: "100%",
     alignItems: "center",
-    marginTop: 200,
+    marginTop: 60,
   },
   card: {
     width: "100%",
-    maxWidth: 360,
-    backgroundColor: "rgba(255,255,255,0.94)",
-    borderRadius: 20,
-    paddingTop: 60, // espaço pro avatar
+    maxWidth: 380,
+    backgroundColor: "rgba(248,250,252,0.96)", // quase branco com glass
+    borderRadius: 24,
+    paddingTop: 56, // espaço pro avatar
     paddingHorizontal: 18,
     paddingBottom: 22,
     alignItems: "center",
 
     shadowColor: "#000",
-    shadowOpacity: 0.18,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 10,
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 14,
+  },
+
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+    alignSelf: "flex-start",
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    fontSize: 12,
+    color: "#6B7280",
+    alignSelf: "flex-start",
+    marginBottom: 14,
   },
 
   // avatar circular que flutua
   avatarWrap: {
     position: "absolute",
-    top: -50,
+    top: -42,
     alignSelf: "center",
-    width: 100,
-    height: 100,
+    width: 84,
+    height: 84,
     borderRadius: 999,
     backgroundColor: "#E5E7EB",
     borderWidth: 3,
-    borderColor: "#FFFFFF",
+    borderColor: "#F9FAFB",
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
@@ -94,7 +120,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#111827",
   },
   avatarFallbackText: {
-    fontSize: 34,
+    fontSize: 30,
     fontWeight: "700",
     color: "#F9FAFB",
   },
@@ -106,54 +132,69 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // inputs
-  input: {
+  // grupo de input (ícone + campo)
+  inputWrapper: {
     width: "100%",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginBottom: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(148,163,184,0.6)", // slate
+    backgroundColor: "rgba(255,255,255,0.96)",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  inputWrapperErro: {
+    borderColor: "#DC2626",
+  },
+  inputIcon: {
+    marginRight: 8,
+  },
+  input: {
+    flex: 1,
     fontSize: 15,
     color: "#111827",
+    paddingVertical: 0,
+  },
 
-    borderWidth: 1,
-    borderColor: "rgba(148,163,184,0.55)", // slate-400
+  inputBioWrapper: {
+    alignItems: "flex-start",
   },
   inputBio: {
     minHeight: 80,
-  },
-  inputErro: {
-    borderColor: "#DC2626",
+    maxHeight: 120,
   },
 
   botaoGradiente: {
     width: "100%",
-    borderRadius: 16,
+    borderRadius: 18,
     paddingVertical: 14,
     alignItems: "center",
     justifyContent: "center",
   },
   botaoTexto: {
     color: "#FFFFFF",
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
+    letterSpacing: 0.3,
+    textTransform: "uppercase",
   },
 
   // link para redefinir senha
   senhaRow: {
-    marginTop: 18,
+    marginTop: 16,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
   },
   senhaText: {
     fontSize: 13,
-    color: "#D1D5DB",
+    color: "#3c3c3c",
   },
   senhaLink: {
     fontSize: 13,
-    color: "#2563EB",
+    color: "#F97316",
     fontWeight: "600",
   },
 });

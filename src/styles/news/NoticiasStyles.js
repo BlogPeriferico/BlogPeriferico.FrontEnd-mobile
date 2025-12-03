@@ -8,6 +8,7 @@ export const styles = StyleSheet.create({
 
   scroll: {
     paddingBottom: 24,
+    paddingTop: 8,
   },
 
   /* ----- Box de climatização ----- */
@@ -17,13 +18,19 @@ export const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#E5E7EB",
+    borderRadius: 14,
     padding: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
   tituloClimatizacao: {
     fontSize: 16,
     fontWeight: "700",
     color: "#111827",
-    marginBottom: 6,
+    marginBottom: 4,
   },
   textoClimatizacao: {
     fontSize: 13,
@@ -38,22 +45,31 @@ export const styles = StyleSheet.create({
   /* ----- Header da sessão + botão adicionar ----- */
   newsHeaderRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
     marginHorizontal: 12,
-    marginTop: 14,
-    marginBottom: 8,
+    marginTop: 18,
+    marginBottom: 6,
+  },
+  newsHeaderLeft: {
+    flex: 1,
+    paddingRight: 12,
   },
   newsHeaderTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "700",
     color: "#111827",
   },
+  newsHeaderSubtitle: {
+    marginTop: 4,
+    fontSize: 13,
+    color: "#6B7280",
+  },
   addBtn: {
-    width: 28,
-    height: 28,
+    minWidth: 32,
+    height: 32,
     borderWidth: 1.5,
-    borderRadius: 14,
+    borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFF",
@@ -62,9 +78,17 @@ export const styles = StyleSheet.create({
   /* ----- Card grande (última notícia) ----- */
   leadCard: {
     marginHorizontal: 12,
+    marginTop: 10,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#E5E7EB",
+    borderRadius: 16,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 3,
   },
   leadImage: {
     width: "100%",
@@ -74,19 +98,35 @@ export const styles = StyleSheet.create({
   leadBody: {
     padding: 16,
   },
-  leadTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
+  leadChip: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: "#F3F4F6",
+    color: "#4B5563",
+    fontSize: 11,
+    fontWeight: "600",
     marginBottom: 8,
   },
+  leadTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 6,
+  },
   leadSubtitle: {
-    fontSize: 13,
+    fontSize: 14,
     lineHeight: 20,
     color: "#374151",
+    marginBottom: 8,
+  },
+  leadMeta: {
+    fontSize: 12,
+    color: "#9CA3AF",
   },
 
-  /* ----- Cards pequenos (layout Figma) ----- */
+  /* ----- Cards pequenos (lista) ----- */
   itemCard: {
     marginHorizontal: 12,
     marginTop: 10,
@@ -94,20 +134,32 @@ export const styles = StyleSheet.create({
     borderColor: "#E5E7EB",
     backgroundColor: "#FFFFFF",
     flexDirection: "row",
-    alignItems: "stretch", // imagem ocupa altura total
+    alignItems: "stretch",
     minHeight: 92,
+    borderRadius: 14,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOpacity: 0.025,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
   },
   itemLeft: {
     flex: 1,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     justifyContent: "center",
   },
   itemTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
     color: "#111827",
-    marginBottom: 12,
+    marginBottom: 6,
+  },
+  itemSubtitle: {
+    fontSize: 13,
+    color: "#4B5563",
+    marginBottom: 8,
   },
   itemMetaRow: {
     flexDirection: "row",
@@ -117,15 +169,15 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     color: "#94A3B8",
     textTransform: "uppercase",
-    marginRight: 24,
+    marginRight: 16,
   },
   itemDate: {
     fontSize: 12,
     color: "#94A3B8",
   },
   itemThumbRight: {
-    width: 116,          // largura fixa para ficar “quadradinho”
-    height: "100%",      // ocupa toda a altura do card
+    width: 116,
+    height: "100%",
     resizeMode: "cover",
   },
   itemThumbRightFallback: {
@@ -134,17 +186,27 @@ export const styles = StyleSheet.create({
     backgroundColor: "#E5E7EB",
   },
 
+  /* ----- Botão Ver Mais ----- */
   verMaisBtn: {
     marginHorizontal: 12,
-    marginTop: 14,
+    marginTop: 16,
     height: 44,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 999,
   },
   verMaisLabel: {
     color: "#FFFFFF",
     fontWeight: "700",
     letterSpacing: 0.6,
+    fontSize: 14,
+  },
+
+  /* ----- Estado vazio ----- */
+  emptyText: {
+    textAlign: "center",
+    color: "#6B7280",
+    marginTop: 16,
     fontSize: 13,
   },
 });

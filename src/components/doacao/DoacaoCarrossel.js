@@ -1,4 +1,3 @@
-// src/components/doacao/DoacaoCarrossel.js
 import React, { useEffect, useState, useRef } from "react";
 import {
   View,
@@ -12,6 +11,7 @@ import {
   Linking,
   Animated,
 } from "react-native";
+
 import { styles as s } from "../../styles/doacao/DoacaoCarrosselStyles";
 import { useRegionTheme } from "../../utils/regionTheme";
 import api from "../../services/api";
@@ -47,7 +47,10 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
     (async () => {
       try {
         const reqs = FIXED_IDS.map((id) =>
-          api.get(`/doacoes/${id}`).then((r) => r.data).catch(() => null)
+          api
+            .get(`/doacoes/${id}`)
+            .then((r) => r.data)
+            .catch(() => null)
         );
         const all = (await Promise.all(reqs)).filter(Boolean);
         if (live) setItens(all);
@@ -81,7 +84,7 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
 
   if (!itens.length) return null;
 
-  const CARD_WIDTH = SCREEN_W * 0.9; // largura do card dentro da página
+  const CARD_WIDTH = SCREEN_W * 0.9;
 
   return (
     <View style={[s.container, containerStyle]}>
@@ -96,12 +99,10 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
         contentContainerStyle={{ alignItems: "stretch" }}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          {
-            useNativeDriver: false, // 👈 IMPORTANTE: false pq animamos width/opacity
-          }
+          { useNativeDriver: false }
         )}
         scrollEventThrottle={16}
-        renderItem={({ item, index }) => (
+        renderItem={({ item }) => (
           <View style={[s.page, { width: SCREEN_W }]}>
             <Pressable
               style={[s.cardShadow, { width: CARD_WIDTH }]}
@@ -112,7 +113,7 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
                   <Text style={s.title} numberOfLines={2}>
                     {item.titulo || "Doação"}
                   </Text>
-                  <Text style={s.subtitle} numberOfLines={3}>
+                  <Text style={s.subtitle} numberOfLines={3} ellipsizeMode="tail">
                     {item.descricao || "Sem descrição disponível."}
                   </Text>
                 </View>
@@ -125,12 +126,7 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
                       resizeMode="cover"
                     />
                   ) : (
-                    <View
-                      style={[
-                        s.heroImage,
-                        { backgroundColor: "#E5E7EB" },
-                      ]}
-                    />
+                    <View style={s.heroImageFallback} />
                   )}
                 </View>
               </View>
@@ -151,15 +147,7 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
                       { color: colors.onPrimary || "#FFF" },
                     ]}
                   >
-                    ENTRE EM CONTATO
-                  </Text>
-                  <Text
-                    style={[
-                      s.ctaArrow,
-                      { color: colors.onPrimary || "#FFF" },
-                    ]}
-                  >
-                    ➜
+                    Entre em contato
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -168,7 +156,7 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
         )}
       />
 
-      {/* Dots animados */}
+      {/* Dots bem limpos */}
       <View style={s.dotsRow}>
         {itens.map((_, i) => {
           const inputRange = [
@@ -177,15 +165,15 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
             (i + 1) * SCREEN_W,
           ];
 
-          const dotWidth = scrollX.interpolate({
+          const opacity = scrollX.interpolate({
             inputRange,
-            outputRange: [24, 40, 24],
+            outputRange: [0.4, 1, 0.4],
             extrapolate: "clamp",
           });
 
-          const opacity = scrollX.interpolate({
+          const scale = scrollX.interpolate({
             inputRange,
-            outputRange: [0.5, 1, 0.5],
+            outputRange: [1, 1.3, 1],
             extrapolate: "clamp",
           });
 
@@ -195,8 +183,8 @@ export default function DoacaoCarrossel({ navigation, containerStyle }) {
               style={[
                 s.dotBase,
                 {
-                  width: dotWidth,
                   opacity,
+                  transform: [{ scale }],
                 },
               ]}
             />

@@ -17,6 +17,9 @@ export default function NewsCardItem({ noticia, onPress, style }) {
           gap: 10,
           alignItems: "center",
           marginBottom: 10,
+          // ⬇️ borda adicionada
+          borderWidth: 1,
+          borderColor: "#E5E7EB",
         },
         style,
       ]}
@@ -24,7 +27,7 @@ export default function NewsCardItem({ noticia, onPress, style }) {
       <View style={{ flex: 1 }}>
         <Text
           numberOfLines={2}
-          style={{ fontSize: 14, fontWeight: "600", color: "#222" }}
+          style={{ fontSize: 6, fontWeight: "400", color: "#222" }}
         >
           {noticia.titulo}
         </Text>
@@ -34,9 +37,7 @@ export default function NewsCardItem({ noticia, onPress, style }) {
         >
           {noticia.subtitulo}
         </Text>
-        <Text
-          style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8 }}
-        >
+        <Text style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8 }}>
           {noticia.regiao ? `${noticia.regiao} • ` : ""}
           {formatDate(noticia.dataIso)}
         </Text>

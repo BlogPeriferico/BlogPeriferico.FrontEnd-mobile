@@ -65,69 +65,86 @@ export default function Noticias({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
 
   // paginação do feed normal
-  const [pageState, setPageState] = useState({ page: 1, pageSize: 5, hasMore: true });
+  const [pageState, setPageState] = useState({
+    page: 1,
+    pageSize: 5,
+    hasMore: true,
+  });
   const [itens, setItens] = useState([]);
   const [loadingMore, setLoadingMore] = useState(false);
 
   // busca
   const [query, setQuery] = useState("");
   const [emBusca, setEmBusca] = useState(false);
-  const [resultados, setResultados] = useState([]); 
+  const [resultados, setResultados] = useState([]);
 
-  const carregar = useCallback(async () => {
-    const data = await getTodasNoticias(); 
-    //  Filtro por região — ajuste para zona se o seu backend usa 'zona':
-    const filtradas = (data || []).filter(
-      (n) =>
-        String(n.regiao ?? n.zona ?? "").toLowerCase() === String(regiao ?? "").toLowerCase()
-    );
-    setListaCompleta(filtradas);
+  const carregar = useCallback(
+    async () => {
+      const data = await getTodasNoticias();
+      //  Filtro por região — ajuste para zona se o seu backend usa 'zona':
+      const filtradas = (data || []).filter(
+        (n) =>
+          String(n.regiao ?? n.zona ?? "").toLowerCase() ===
+          String(regiao ?? "").toLowerCase()
+      );
+      setListaCompleta(filtradas);
 
-    // se NÃO está buscando, inicializa feed com paginação
-    if (!emBusca) {
-      const pg = paginaNoticias(filtradas, { page: 1, pageSize: 5 });
-      setItens(pg.items);
-      setPageState({ page: 1, pageSize: 5, hasMore: pg.hasMore });
-    } else {
-      // se está buscando, atualiza resultados com nova base
-      const novos = filtradas.filter((n) => matchesQuery(n, query));
-      setResultados(novos);
-    }
-  }, [regiao, emBusca, query]);
+      // se NÃO está buscando, inicializa feed com paginação
+      if (!emBusca) {
+        const pg = paginaNoticias(filtradas, { page: 1, pageSize: 5 });
+        setItens(pg.items);
+        setPageState({ page: 1, pageSize: 5, hasMore: pg.hasMore });
+      } else {
+        // se está buscando, atualiza resultados com nova base
+        const novos = filtradas.filter((n) => matchesQuery(n, query));
+        setResultados(novos);
+      }
+    },
+    [regiao, emBusca, query]
+  );
 
-  const load = useCallback(async () => {
-    try {
-      setLoading(true);
-      await carregar();
-    } catch (e) {
-      dbg("ERRO carregar:", e?.message || e);
-      Alert.alert("Erro", "Não foi possível carregar as notícias.");
-    } finally {
-      setLoading(false);
-    }
-  }, [carregar]);
+  const load = useCallback(
+    async () => {
+      try {
+        setLoading(true);
+        await carregar();
+      } catch (e) {
+        dbg("ERRO carregar:", e?.message || e);
+        Alert.alert("Erro", "Não foi possível carregar as notícias.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [carregar]
+  );
 
   useEffect(() => {
     load();
   }, [load]);
 
-  const onRefresh = useCallback(async () => {
-    try {
-      setRefreshing(true);
-      await carregar();
-    } catch (e) {
-      Alert.alert("Erro", "Falha ao atualizar as notícias.");
-    } finally {
-      setRefreshing(false);
-    }
-  }, [carregar]);
+  const onRefresh = useCallback(
+    async () => {
+      try {
+        setRefreshing(true);
+        await carregar();
+      } catch (e) {
+        Alert.alert("Erro", "Falha ao atualizar as notícias.");
+      } finally {
+        setRefreshing(false);
+      }
+    },
+    [carregar]
+  );
 
   const handleVerMais = async () => {
     if (!pageState.hasMore || loadingMore || emBusca) return;
     try {
       setLoadingMore(true);
       const nextPage = pageState.page + 1;
-      const pg = paginaNoticias(listaCompleta, { page: nextPage, pageSize: 4 });
+      const pg = paginaNoticias(listaCompleta, {
+        page: nextPage,
+        pageSize: 4,
+      });
       setItens((old) => [...old, ...pg.items]);
       setPageState({ page: nextPage, pageSize: 4, hasMore: pg.hasMore });
     } finally {
@@ -140,15 +157,20 @@ export default function Noticias({ navigation }) {
       const qStr = String(q || "").trim();
       setQuery(qStr);
       if (!qStr) {
-        // limpa busca 
+        // limpa busca
         setEmBusca(false);
-        const pg = paginaNoticias(listaCompleta, { page: 1, pageSize: 5 });
+        const pg = paginaNoticias(listaCompleta, {
+          page: 1,
+          pageSize: 5,
+        });
         setItens(pg.items);
         setPageState({ page: 1, pageSize: 5, hasMore: pg.hasMore });
         return;
       }
       setEmBusca(true);
-      const filtrados = (listaCompleta || []).filter((n) => matchesQuery(n, qStr));
+      const filtrados = (listaCompleta || []).filter((n) =>
+        matchesQuery(n, qStr)
+      );
       dbg("BUSCA", qStr, "->", filtrados.length);
       setResultados(filtrados);
     },
@@ -158,29 +180,38 @@ export default function Noticias({ navigation }) {
   useEffect(() => {
     const sub = DeviceEventEmitter.addListener("app:search", ({ q }) => {
       aplicarBusca(q);
-      
     });
     return () => sub.remove();
   }, [aplicarBusca]);
 
-  useEffect(() => {
-    const q = route?.params?.q;
-    if (typeof q === "string") {
-      aplicarBusca(q);
-      try {
-        navigation.setParams({ q: undefined });
-      } catch {}
-    }
-  }, [route?.params?.q, aplicarBusca, navigation]);
+  useEffect(
+    () => {
+      const q = route?.params?.q;
+      if (typeof q === "string") {
+        aplicarBusca(q);
+        try {
+          navigation.setParams({ q: undefined });
+        } catch {}
+      }
+    },
+    [route?.params?.q, aplicarBusca, navigation]
+  );
 
-  const ultima = useMemo(() => (emBusca ? null : itens?.[0]), [emBusca, itens]);
-  const restantes = useMemo(() => {
-    if (emBusca) return resultados; 
-    return itens?.length > 1 ? itens.slice(1) : [];
-  }, [emBusca, itens, resultados]);
+  const ultima = useMemo(
+    () => (emBusca ? null : itens?.[0]),
+    [emBusca, itens]
+  );
+  const restantes = useMemo(
+    () => {
+      if (emBusca) return resultados;
+      return itens?.length > 1 ? itens.slice(1) : [];
+    },
+    [emBusca, itens, resultados]
+  );
 
   const goNovaNoticia = () => navigation.navigate("NovaNoticia");
-  const goDetalhe = (noticia) => navigation.navigate("DetalheNoticia", { noticia });
+  const goDetalhe = (noticia) =>
+    navigation.navigate("DetalheNoticia", { noticia });
 
   return (
     <View style={s.container}>
@@ -201,49 +232,79 @@ export default function Noticias({ navigation }) {
         <CardClima />
 
         {/* BOX CLIMATIZAÇÃO */}
-        <View style={s.climatizacaoBox}>
+        <View
+          style={[
+            s.climatizacaoBox,
+            { borderTopColor: colors.primary, borderTopWidth: 3 },
+          ]}
+        >
           <Text style={s.tituloClimatizacao}>Área de climatização</Text>
           <Text style={s.textoClimatizacao}>
-            Nossas cores são baseadas nas cores das zonas da SpTrans
+            Nossas cores são baseadas nas zonas da SPTrans. Cada região tem uma
+            paleta própria dentro do aplicativo.
           </Text>
           <TouchableOpacity>
-            <Text style={[s.link, { color: colors.primary }]}>Por que das cores?</Text>
+            <Text style={[s.link, { color: colors.primary }]}>
+              Entenda o sistema de cores
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {/* TÍTULO SESSÃO + BOTÃO ADICIONAR + status da busca */}
+        {/* HEADER DE NOTÍCIAS */}
         <View style={s.newsHeaderRow}>
-          <Text style={s.newsHeaderTitle}>
-            {emBusca ? "Resultados da busca" : "Seleção de notícias"}
-          </Text>
+          <View style={s.newsHeaderLeft}>
+            <Text style={s.newsHeaderTitle}>
+              {emBusca ? "Resultados da busca" : "Seleção de notícias"}
+            </Text>
+            {!emBusca && (
+              <Text style={s.newsHeaderSubtitle}>
+                Acompanhe o que está acontecendo na sua região
+              </Text>
+            )}
+            {emBusca && (
+              <Text style={s.newsHeaderSubtitle}>
+                {resultados.length} resultado
+                {resultados.length === 1 ? "" : "s"}
+                {query ? ` para “${query}”` : ""}
+              </Text>
+            )}
+          </View>
 
           {emBusca ? (
             <TouchableOpacity
               onPress={() => aplicarBusca("")}
               accessibilityLabel="Limpar busca"
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              style={[s.addBtn, { borderColor: colors.primary, paddingHorizontal: 10 }]}
+              style={[
+                s.addBtn,
+                {
+                  borderColor: colors.primary,
+                  paddingHorizontal: 12,
+                  backgroundColor: "#FFFFFF",
+                },
+              ]}
             >
-              <Text style={{ color: colors.primary, fontWeight: "600" }}>Limpar</Text>
+              <Text style={{ color: colors.primary, fontWeight: "600" }}>
+                Limpar
+              </Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               onPress={goNovaNoticia}
               accessibilityLabel="Adicionar notícia"
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              style={[s.addBtn, { borderColor: colors.primary }]}
+              style={[
+                s.addBtn,
+                {
+                  borderColor: colors.primary,
+                  backgroundColor: "#FFFFFF",
+                },
+              ]}
             >
               <AddIcon width={18} height={18} color={colors.primary} />
             </TouchableOpacity>
           )}
         </View>
-
-        {emBusca && (
-          <Text style={{ color: "#6B7280", marginBottom: 8 }}>
-            {resultados.length} resultado{resultados.length === 1 ? "" : "s"}
-            {query ? ` para “${query}”` : ""}
-          </Text>
-        )}
 
         {loading ? (
           <View style={{ paddingVertical: 24 }}>
@@ -251,7 +312,7 @@ export default function Noticias({ navigation }) {
           </View>
         ) : (
           <>
-            {/* CARD GRANDE (última) */}
+            {/* CARD GRANDE (última notícia) */}
             {!emBusca && ultima ? (
               <TouchableOpacity
                 activeOpacity={0.9}
@@ -262,12 +323,18 @@ export default function Noticias({ navigation }) {
                   <Image source={{ uri: ultima.imagem }} style={s.leadImage} />
                 ) : null}
                 <View style={s.leadBody}>
+                  <Text style={s.leadChip}>
+                    {String(ultima.regiao || ultima.zona || "Centro").toUpperCase()}
+                  </Text>
                   <Text style={s.leadTitle}>{ultima.titulo}</Text>
                   {!!ultima.subtitulo && (
-                    <Text style={s.leadSubtitle} numberOfLines={6}>
+                    <Text style={s.leadSubtitle} numberOfLines={4}>
                       {ultima.subtitulo}
                     </Text>
                   )}
+                  <Text style={s.leadMeta}>
+                    Publicado em {formatDatePt(ultima.dataHoraCriacao)}
+                  </Text>
                 </View>
               </TouchableOpacity>
             ) : null}
@@ -284,6 +351,12 @@ export default function Noticias({ navigation }) {
                   <Text style={s.itemTitle} numberOfLines={2}>
                     {item.titulo}
                   </Text>
+                  {!!item.subtitulo && (
+                    <Text style={s.itemSubtitle} numberOfLines={2}>
+                      {item.subtitulo}
+                    </Text>
+                  )}
+
                   <View style={s.itemMetaRow}>
                     <Text style={s.itemRegion} numberOfLines={1}>
                       {String(item.regiao || item.zona || "Centro").toUpperCase()}
@@ -295,7 +368,10 @@ export default function Noticias({ navigation }) {
                 </View>
 
                 {item.thumb || item.imagem ? (
-                  <Image source={{ uri: item.thumb || item.imagem }} style={s.itemThumbRight} />
+                  <Image
+                    source={{ uri: item.thumb || item.imagem }}
+                    style={s.itemThumbRight}
+                  />
                 ) : (
                   <View style={s.itemThumbRightFallback} />
                 )}
@@ -308,18 +384,25 @@ export default function Noticias({ navigation }) {
                 onPress={handleVerMais}
                 disabled={loadingMore}
                 activeOpacity={0.9}
-                style={[s.verMaisBtn, { backgroundColor: colors.primary }]}
+                style={[
+                  s.verMaisBtn,
+                  {
+                    backgroundColor: colors.primary,
+                  },
+                ]}
               >
                 <Text style={s.verMaisLabel}>
-                  {loadingMore ? "Carregando..." : "VER MAIS"}
+                  {loadingMore ? "Carregando..." : "Ver mais notícias"}
                 </Text>
               </TouchableOpacity>
             ) : null}
 
             {/* vazio */}
             {!loading && restantes.length === 0 && (
-              <Text style={{ textAlign: "center", color: "#6B7280", marginTop: 12 }}>
-                {emBusca ? "Sem resultados para a busca." : "Sem notícias nesta região."}
+              <Text style={s.emptyText}>
+                {emBusca
+                  ? "Sem resultados para a busca."
+                  : "Ainda não há notícias cadastradas nessa região."}
               </Text>
             )}
           </>

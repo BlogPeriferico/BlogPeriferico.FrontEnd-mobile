@@ -4,12 +4,11 @@ import { StyleSheet } from "react-native";
 
 /**
  * Estilos da tela Sobre, usando o tema de região (colors.primary etc).
- * `colors` vem do useRegionTheme(): { primary, primaryDark, border, soft, textOnPrimary }
  */
 export const makeSobreStyles = (colors = {}) => {
   const primary = colors.primary || "#00AEEF";
-  const primaryDark = colors.primaryDark || "#73C9FF"; // segunda cor da região
-  const background = colors.background || "#fff";
+  const primaryDark = colors.primaryDark || "#73C9FF";
+  const background = colors.background || "#F3F4F6";
 
   return StyleSheet.create({
     container: {
@@ -22,148 +21,172 @@ export const makeSobreStyles = (colors = {}) => {
     scrollContent: {
       paddingHorizontal: 16,
       paddingTop: 8,
-      paddingBottom: 16,
+      paddingBottom: 24,
+      alignItems: "center",
     },
 
-    /* CARD IMAGEM */
+    /* ===== HERO / CAPA ===== */
     cardImagem: {
-      backgroundColor: "#F5F5F5",
-      borderRadius: 8,
-      overflow: "hidden",
-      marginBottom: 16,
-      alignSelf: "center",
       width: "100%",
-      maxWidth: 370,
+      maxWidth: 420,
+      borderRadius: 20,
+      overflow: "hidden",
+      backgroundColor: "#020617",
+      marginBottom: 20,
       shadowColor: "#000",
-      shadowOpacity: 0.08,
-      shadowRadius: 10,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 4,
+      shadowOpacity: 0.16,
+      shadowRadius: 18,
+      shadowOffset: { width: 0, height: 10 },
+      elevation: 6,
+      position: "relative",
     },
     imagem: {
       width: "100%",
       height: 230,
     },
-    legendaWrapper: {
-      paddingTop: 18,
-      paddingBottom: 18,
-      paddingHorizontal: 24,
-      backgroundColor: "#F5F5F5",
-      alignItems: "center",
+    overlayGradient: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+      backgroundColor: "rgba(15,23,42,0.55)",
+    },
+    heroContent: {
+      position: "absolute",
+      left: 18,
+      right: 18,
+      bottom: 18,
+    },
+    heroTag: {
+      alignSelf: "flex-start",
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 999,
+      backgroundColor: "rgba(255,255,255,0.12)",
+      marginBottom: 6,
+    },
+    heroTagText: {
+      fontSize: 11,
+      color: "#E5E7EB",
+      letterSpacing: 0.5,
+      textTransform: "uppercase",
+      fontFamily: "Fraunces_400Regular",
     },
     legendaTitulo: {
-      fontSize: 14,
-      color: "#000000",
-      textAlign: "center",
-      marginBottom: 6,
-      fontFamily: "Fraunces_400Regular", // título regular
+      fontSize: 18,
+      color: "#F9FAFB",
+      textAlign: "left",
+      marginBottom: 4,
+      fontFamily: "Fraunces_400Regular",
     },
     legendaTexto: {
       fontSize: 12,
-      color: "#6D6E76",
-      textAlign: "center",
+      color: "#E5E7EB",
+      textAlign: "left",
       lineHeight: 18,
-      fontFamily: "Fraunces_400Regular", // subtítulo regular também
+      fontFamily: "Fraunces_400Regular",
     },
 
-    /* CARD SOBRE NÓS */
+    /* ===== CARD SOBRE NÓS ===== */
     cardSobre: {
-      backgroundColor: "#F7F6F5",
-      borderRadius: 14,
-      paddingTop: 18,
+      backgroundColor: "#FFFFFF",
+      borderRadius: 18,
+      paddingTop: 22,
       paddingBottom: 18,
       paddingHorizontal: 18,
-      marginBottom: 18,
-      alignSelf: "center",
+      marginBottom: 20,
       width: "100%",
-      maxWidth: 370,
+      maxWidth: 420,
       shadowColor: "#000",
-      shadowOpacity: 0.04,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 2 },
-      elevation: 2,
+      shadowOpacity: 0.06,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 3,
       position: "relative",
+      borderWidth: 1,
+      borderColor: "#E5E7EB",
     },
 
-    /* Barras superiores usando cores da região */
     tabs: {
       position: "absolute",
       top: 0,
       left: 0,
       right: 0,
       flexDirection: "row",
-      height: 6,
+      height: 4,
     },
     tabAtiva: {
       flex: 1.6,
       backgroundColor: primary,
-      borderTopLeftRadius: 14,
+      borderTopLeftRadius: 18,
     },
     tabInativa: {
       flex: 1,
       backgroundColor: primaryDark,
-      borderTopRightRadius: 14,
+      borderTopRightRadius: 18,
     },
 
-    /* "Sobre nós" label */
     sobreTituloTopo: {
-      fontSize: 14,
-      color: "#6D6E76",
+      fontSize: 13,
+      color: "#9CA3AF",
+      marginBottom: 4,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+      fontFamily: "Fraunces_400Regular",
+    },
+    sobrePergunta: {
+      fontSize: 18,
+      color: "#111827",
+      marginBottom: 10,
+      fontFamily: "Fraunces_400Regular",
+    },
+    sobreTexto: {
+      fontSize: 13,
+      color: "#4B5563",
+      lineHeight: 20,
       marginBottom: 6,
       fontFamily: "Fraunces_400Regular",
     },
-
-    /* Pergunta */
-    sobrePergunta: {
-      fontSize: 16,
-      color: "#000000",
-      marginBottom: 10,
-      fontFamily: "Fraunces_400Regular",
-    },
-
-    /* Parágrafo */
-    sobreTexto: {
-      fontSize: 12,
-      color: "#6D6E76",
-      lineHeight: 18,
-      marginBottom: 4,
-      fontFamily: "Fraunces_400Regular",
-    },
-
     linkFuncionalidades: {
-      marginTop: 6,
-      fontSize: 11,
+      marginTop: 8,
+      fontSize: 12,
       color: primary,
-      // se estiver usando Poppins pelo @expo-google-fonts:
-      // fontFamily: "Poppins_500Medium",
+      fontWeight: "600",
     },
 
-    /* BOTÕES */
+    /* ===== BOTÕES DAS ÁREAS ===== */
     botoesWrapper: {
-      marginBottom: 10,
-      gap: 8,
+      width: "100%",
+      maxWidth: 420,
+      marginBottom: 14,
+      flexDirection: "row",
+      flexWrap: "wrap",
+      columnGap: 10,
+      rowGap: 10,
     },
     botao: {
+      flexBasis: "48%",
       backgroundColor: "#FFFFFF",
-      borderRadius: 8,
+      borderRadius: 14,
       borderWidth: 1,
-      borderColor: "#E3E3E3",
-      elevation: 2,
+      borderColor: "#E5E7EB",
       overflow: "hidden",
-      marginBottom: 6,
+      shadowColor: "#000",
+      shadowOpacity: 0.04,
+      shadowRadius: 6,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 2,
     },
     botaoAtivo: {
       borderColor: primary,
-      shadowColor: "#000",
-      shadowOpacity: 0.16,
-      shadowRadius: 4,
-      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.14,
       transform: [{ translateY: -1 }],
     },
     botaoBarra: {
       height: 3,
       width: "100%",
-      backgroundColor: "#EEEEEE",
+      backgroundColor: "#F3F4F6",
     },
     botaoBarraAtiva: {
       backgroundColor: primary,
@@ -171,45 +194,62 @@ export const makeSobreStyles = (colors = {}) => {
     botaoConteudo: {
       flexDirection: "row",
       alignItems: "center",
+      justifyContent: "flex-start",
       paddingVertical: 10,
       paddingHorizontal: 12,
-      gap: 10,
+      columnGap: 8,
     },
     botaoIcon: {
-      fontSize: 20,
+      fontSize: 18,
     },
     botaoTexto: {
-      fontSize: 17,
+      fontSize: 14,
       fontWeight: "600",
-      color: "#444444",
+      color: "#374151",
     },
     botaoTextoAtivo: {
       color: primary,
-      fontWeight: "700",
     },
 
-    /* DESCRIÇÃO SELECIONADA */
+    /* ===== DESCRIÇÃO SELECIONADA ===== */
     descBox: {
+      width: "100%",
+      maxWidth: 420,
       marginTop: 4,
-      padding: 10,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
       backgroundColor: "#FFFFFF",
-      borderRadius: 8,
+      borderRadius: 14,
       borderWidth: 1,
-      borderColor: "#E3E3E3",
+      borderColor: "#E5E7EB",
+      shadowColor: "#000",
+      shadowOpacity: 0.04,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 3 },
       elevation: 2,
       borderLeftWidth: 4,
       borderLeftColor: primary,
     },
+    descChip: {
+      alignSelf: "flex-start",
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 999,
+      backgroundColor: "#EEF2FF",
+      color: "#4F46E5",
+      fontSize: 11,
+      marginBottom: 4,
+    },
     descTitulo: {
-      fontSize: 14,
+      fontSize: 15,
       fontWeight: "700",
-      color: primary,
+      color: "#111827",
       marginBottom: 4,
     },
     descTexto: {
       fontSize: 13,
-      color: "#444444",
-      lineHeight: 18,
+      color: "#4B5563",
+      lineHeight: 20,
     },
 
     bottomSpacer: {

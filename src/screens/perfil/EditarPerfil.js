@@ -21,6 +21,7 @@ import StatusModal from "../../components/ui/StatusModal";
 import { getUserId } from "../../services/auth";
 import api from "../../services/api";
 import { usuarioUtils } from "../../services/usuario";
+import { useRegionTheme } from "../../utils/regionTheme";
 
 const validarEmail = (e) =>
   /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/i.test(String(e || "").trim());
@@ -39,6 +40,9 @@ function getIniciais(nome) {
 }
 
 export default function EditarPerfil({ navigation }) {
+  const { colors } = useRegionTheme();
+  const accent = colors.primary || "#111827";
+
   const [userId, setUserId] = useState(null);
 
   const [nome, setNome] = useState("");
@@ -82,7 +86,6 @@ export default function EditarPerfil({ navigation }) {
 
       setUserId(uid);
 
-      // mesmo endpoint do Perfil: /usuarios/listar/{id}
       const { data } = await api.get(`/usuarios/listar/${uid}`);
 
       const nomeBack = data?.nome || "";
@@ -159,11 +162,10 @@ export default function EditarPerfil({ navigation }) {
     try {
       setSalvando(true);
 
-      // alinhado com o back: PATCH /usuarios/atualizar/{id}
       const payload = {
         nome: nomeTrim,
         email: emailTrim,
-        bio: bioTrim, // se o back ignorar, suave; se aceitar, melhor
+        bio: bioTrim,
       };
 
       await api.patch(`/usuarios/atualizar/${userId}`, payload);
@@ -192,7 +194,6 @@ export default function EditarPerfil({ navigation }) {
   };
 
   const handleRedefinirSenha = () => {
-    // ajusta se o nome da rota for outro
     if (navigation && navigation.navigate) {
       navigation.navigate("RedefinirSenha");
     }
@@ -210,20 +211,25 @@ export default function EditarPerfil({ navigation }) {
           <ScrollView
             contentContainerStyle={s.scrollContent}
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
             {/* topo com botão voltar + título */}
             <View style={s.headerRow}>
               <TouchableOpacity
                 onPress={handleGoBack}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                style={s.backBtn}
               >
-                <Ionicons name="arrow-back" size={24} color="#111827" />
+                <Ionicons name="arrow-back" size={22} color="#0F172A" />
               </TouchableOpacity>
 
-              <Text style={s.titulo}>Editar Perfil</Text>
+              <View style={s.headerTextWrap}>
+                <Text style={s.titulo}>Editar perfil</Text>
+                <Text style={s.subtitulo}>
+                  Atualize como a quebrada te enxerga no app.
+                </Text>
+              </View>
             </View>
-
-            <Text style={s.subtitulo}>Edite seu perfil</Text>
 
             {/* CARD PRINCIPAL */}
             <View style={s.cardWrapper}>
@@ -243,6 +249,11 @@ export default function EditarPerfil({ navigation }) {
                   )}
                 </View>
 
+                <Text style={s.cardTitle}>Seu perfil</Text>
+                <Text style={s.cardSubtitle}>
+                  Nome, contato e bio que aparecem nas suas publicações.
+                </Text>
+
                 {loading ? (
                   <View style={s.loadingArea}>
                     <ActivityIndicator size="large" color="#4B5563" />
@@ -250,47 +261,94 @@ export default function EditarPerfil({ navigation }) {
                 ) : (
                   <>
                     {/* Nome */}
-                    <TextInput
-                      value={nome}
-                      onChangeText={(t) => {
-                        setNome(t);
-                        setCampoInvalido((p) => ({ ...p, nome: false }));
-                      }}
-                      placeholder="Seu nome"
-                      placeholderTextColor="#9CA3AF"
-                      style={[s.input, campoInvalido.nome && s.inputErro]}
-                      autoCapitalize="words"
-                      returnKeyType="next"
-                    />
+                    <View
+                      style={[
+                        s.inputWrapper,
+                        campoInvalido.nome && s.inputWrapperErro,
+                      ]}
+                    >
+                      <Ionicons
+                        name="person-outline"
+                        size={18}
+                        color="#9CA3AF"
+                        style={s.inputIcon}
+                      />
+                      <TextInput
+                        value={nome}
+                        onChangeText={(t) => {
+                          setNome(t);
+                          setCampoInvalido((p) => ({ ...p, nome: false }));
+                        }}
+                        placeholder="Seu nome completo"
+                        placeholderTextColor="#9CA3AF"
+                        style={s.input}
+                        autoCapitalize="words"
+                        returnKeyType="next"
+                      />
+                    </View>
 
                     {/* Email */}
-                    <TextInput
-                      value={email}
-                      onChangeText={(t) => {
-                        setEmail(t);
-                        setCampoInvalido((p) => ({ ...p, email: false }));
-                      }}
-                      placeholder="email@exemplo.com"
-                      placeholderTextColor="#9CA3AF"
-                      style={[s.input, campoInvalido.email && s.inputErro]}
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      returnKeyType="next"
-                    />
+                    <View
+                      style={[
+                        s.inputWrapper,
+                        campoInvalido.email && s.inputWrapperErro,
+                      ]}
+                    >
+                      <Ionicons
+                        name="mail-outline"
+                        size={18}
+                        color="#9CA3AF"
+                        style={s.inputIcon}
+                      />
+                      <TextInput
+                        value={email}
+                        onChangeText={(t) => {
+                          setEmail(t);
+                          setCampoInvalido((p) => ({ ...p, email: false }));
+                        }}
+                        placeholder="email@exemplo.com"
+                        placeholderTextColor="#9CA3AF"
+                        style={s.input}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        returnKeyType="next"
+                      />
+                    </View>
 
-                    
+                    {/* Bio */}
+                    <View style={[s.inputWrapper, s.inputBioWrapper]}>
+                      <Ionicons
+                        name="text-outline"
+                        size={18}
+                        color="#9CA3AF"
+                        style={[s.inputIcon, { marginTop: 4 }]}
+                      />
+                      <TextInput
+                        value={bio}
+                        onChangeText={setBio}
+                        placeholder="Fale um pouco sobre você, seu corre, sua quebrada..."
+                        placeholderTextColor="#9CA3AF"
+                        style={[s.input, s.inputBio]}
+                        multiline
+                        textAlignVertical="top"
+                        maxLength={220}
+                      />
+                    </View>
 
                     {/* Botão salvar */}
                     <TouchableOpacity
                       activeOpacity={0.9}
                       onPress={handleSalvar}
                       disabled={salvando}
-                      style={{ width: "100%", marginTop: 12 }}
+                      style={{ width: "100%", marginTop: 10 }}
                     >
                       <LinearGradient
-                        colors={["#9B9B9B", "#6F6F6F"]}
-                        start={{ x: 0.5, y: 0 }}
-                        end={{ x: 0.5, y: 1 }}
+                        colors={[
+                          accent,
+                          colors.primaryDark || accent,
+                        ]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
                         style={[
                           s.botaoGradiente,
                           salvando && { opacity: 0.7 },
@@ -299,16 +357,16 @@ export default function EditarPerfil({ navigation }) {
                         {salvando ? (
                           <ActivityIndicator size="small" color="#fff" />
                         ) : (
-                          <Text style={s.botaoTexto}>Salvar Edição</Text>
+                          <Text style={s.botaoTexto}>Salvar edição</Text>
                         )}
                       </LinearGradient>
                     </TouchableOpacity>
 
                     {/* Link "Redefinir senha" */}
                     <View style={s.senhaRow}>
-                      <Text style={s.senhaText}>Alterar minha senha </Text>
+                      <Text style={s.senhaText}>Quer trocar sua senha? </Text>
                       <TouchableOpacity onPress={handleRedefinirSenha}>
-                        <Text style={s.senhaLink}>Redefinir Senha</Text>
+                        <Text style={s.senhaLink}>Redefinir senha</Text>
                       </TouchableOpacity>
                     </View>
                   </>

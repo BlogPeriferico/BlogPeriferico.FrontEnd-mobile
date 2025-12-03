@@ -19,6 +19,7 @@ import {
   DeviceEventEmitter,
   Alert,
   Image,
+  Keyboard, // 👈 ADICIONADO
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
@@ -35,11 +36,6 @@ import { getUserId } from "../services/auth";
 const { width } = Dimensions.get("window");
 const dbg = (...a) => console.log("🧱[Header]", ...a);
 
-/**
- * 🔧 NOMES DAS ROTAS
- *  - Stack raiz (StackNavigator): Main, Perfil
- *  - Tabs dentro de Main: NoticiasTab, DoacoesTab, VendasTab, MaoAmigaTab, SobreTab
- */
 const ROOT_ROUTES = {
   MAIN: "Main",
   PERFIL: "Perfil",
@@ -53,9 +49,6 @@ const TAB_ROUTES = {
   SOBRE: "SobreTab",
 };
 
-/**
- * Para o sistema de busca (emit por DeviceEventEmitter)
- */
 const ROUTE_SEARCH_TARGETS = {
   DetalheNoticia: "NoticiasHome",
   DetalheDoacao: "DoacoesHome",
@@ -146,19 +139,16 @@ export default function Header() {
 
   /* ============== DERIVADOS ANIMADOS ============== */
 
-  // barrinha colorida embaixo do header "respirando" com o menu
   const accentScale = menuAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [1, 1.08],
   });
 
-  // titulo dá uma leve encolhida quando a busca abre
   const titleScale = searchAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [1, 0.94],
   });
 
-  // caixa de busca com fundo / borda animados
   const searchWidth = searchAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [0, width - 120],
@@ -171,12 +161,12 @@ export default function Header() {
 
   const searchBorderColor = searchAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ["rgba(148,163,184,0)", "rgba(148,163,184,1)"], // slate-400
+    outputRange: ["rgba(148,163,184,0)", "rgba(148,163,184,1)"],
   });
 
   const searchBgColor = searchAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ["#F3F4F6", "#EEF2FF"], // cinza -> lilás claro
+    outputRange: ["#F3F4F6", "#EEF2FF"],
   });
 
   const lupaRotate = searchAnim.interpolate({
@@ -309,7 +299,12 @@ export default function Header() {
 
     dbg("toggleBusca()", { abrir, buscando });
 
-    if (abrir) setBuscando(true);
+    if (abrir) {
+      setBuscando(true);
+    } else {
+      // fechando -> esconde teclado
+      Keyboard.dismiss();
+    }
 
     Animated.timing(searchAnim, {
       toValue: abrir ? 1 : 0,
@@ -348,8 +343,19 @@ export default function Header() {
       duration: 80,
       useNativeDriver: false,
     }).start(() => {
-      if (buscando) doSearch();
-      else toggleBusca(true);
+      // 🔥 NOVA LÓGICA:
+      // - se a busca estiver aberta e não tiver texto -> fecha a barra
+      // - se a busca estiver aberta e tiver texto -> busca
+      // - se estiver fechada -> abre
+      if (buscando) {
+        if (!busca.trim()) {
+          toggleBusca(false);
+        } else {
+          doSearch();
+        }
+      } else {
+        toggleBusca(true);
+      }
     });
 
   /* ============== NAVEGAÇÃO (ROOT + TABS) ============== */
@@ -408,9 +414,6 @@ export default function Header() {
     }
   };
 
-  /* ============== RENDER ============== */
-
-  // iniciais de fallback p/ avatar
   const initials =
     userName
       .split(" ")
@@ -519,11 +522,14 @@ export default function Header() {
             onPressOut={onLupaPressOut}
           >
             <Animated.View
-              style={{
-                transform: [{ rotate: lupaRotate }, { scale: lupaScale }],
-              }}
+              style={[
+                styles.searchIconWrap,
+                {
+                  transform: [{ rotate: lupaRotate }, { scale: lupaScale }],
+                },
+              ]}
             >
-              <Ionicons name="search" size={24} color={colors.primary} />
+              <Ionicons name="search" size={20} color={colors.primary} />
             </Animated.View>
           </TouchableOpacity>
         </Animated.View>
@@ -580,7 +586,7 @@ export default function Header() {
               </View>
             </View>
 
-            {/* Itens do menu com ícones */}
+            {/* Itens do menu */}
             <TouchableOpacity
               onPress={() => fecharMenu(() => goPerfil())}
               activeOpacity={0.85}

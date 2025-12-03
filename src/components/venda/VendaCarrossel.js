@@ -1,4 +1,3 @@
-// src/components/venda/VendaCarrossel.js
 import React, { useEffect, useState, useRef } from "react";
 import {
   View,
@@ -102,7 +101,7 @@ export default function VendaCarrossel({ navigation, containerStyle }) {
 
   if (!itens.length) return null;
 
-  const CARD_WIDTH = SCREEN_W * 0.92;
+  const CARD_WIDTH = SCREEN_W * 0.9; // mesmo padrão do Vaga/Doação
 
   return (
     <View style={[s.container, containerStyle]}>
@@ -131,12 +130,14 @@ export default function VendaCarrossel({ navigation, containerStyle }) {
                   <Text style={s.title} numberOfLines={2}>
                     {item.titulo || "Venda"}
                   </Text>
+
                   {!!item.valor && (
                     <Text style={s.price} numberOfLines={1}>
                       {fmtBRL(item.valor)}
                     </Text>
                   )}
-                  <Text style={s.subtitle} numberOfLines={3}>
+
+                  <Text style={s.subtitle} numberOfLines={3} ellipsizeMode="tail">
                     {item.descricao || "Sem descrição disponível."}
                   </Text>
                 </View>
@@ -149,12 +150,7 @@ export default function VendaCarrossel({ navigation, containerStyle }) {
                       resizeMode="cover"
                     />
                   ) : (
-                    <View
-                      style={[
-                        s.heroImage,
-                        { backgroundColor: "#E5E7EB" },
-                      ]}
-                    />
+                    <View style={s.heroImageFallback} />
                   )}
                 </View>
               </View>
@@ -174,15 +170,7 @@ export default function VendaCarrossel({ navigation, containerStyle }) {
                       { color: colors.onPrimary || "#FFF" },
                     ]}
                   >
-                    FALAR COM VENDEDOR
-                  </Text>
-                  <Text
-                    style={[
-                      s.ctaArrow,
-                      { color: colors.onPrimary || "#FFF" },
-                    ]}
-                  >
-                    ➜
+                    Falar com vendedor
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -199,15 +187,15 @@ export default function VendaCarrossel({ navigation, containerStyle }) {
             (i + 1) * SCREEN_W,
           ];
 
-          const dotWidth = scrollX.interpolate({
+          const opacity = scrollX.interpolate({
             inputRange,
-            outputRange: [24, 40, 24],
+            outputRange: [0.4, 1, 0.4],
             extrapolate: "clamp",
           });
 
-          const opacity = scrollX.interpolate({
+          const scale = scrollX.interpolate({
             inputRange,
-            outputRange: [0.5, 1, 0.5],
+            outputRange: [1, 1.3, 1],
             extrapolate: "clamp",
           });
 
@@ -217,8 +205,8 @@ export default function VendaCarrossel({ navigation, containerStyle }) {
               style={[
                 s.dotBase,
                 {
-                  width: dotWidth,
                   opacity,
+                  transform: [{ scale }],
                 },
               ]}
             />

@@ -1,4 +1,3 @@
-// src/styles/vaga/VagaCarrosselStyles.js
 import { StyleSheet, Platform } from "react-native";
 
 export const styles = StyleSheet.create({
@@ -14,27 +13,25 @@ export const styles = StyleSheet.create({
   page: {
     alignItems: "center",
     justifyContent: "flex-start",
-    paddingTop: 4,
-    paddingBottom: 4,
+    paddingVertical: 4,
   },
 
   cardShadow: {
-    width: "92%",
-    borderRadius: 20,
-    paddingVertical: 22,
-    paddingHorizontal: 22,
+    borderRadius: 18,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
     backgroundColor: "#FFFFFF",
     flexDirection: "column",
 
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOpacity: 0.12,
-        shadowOffset: { width: 0, height: 10 },
-        shadowRadius: 22,
+        shadowOpacity: 0.07,
+        shadowOffset: { width: 0, height: 8 },
+        shadowRadius: 16,
       },
       android: {
-        elevation: 7,
+        elevation: 5,
       },
     }),
   },
@@ -56,27 +53,42 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
+  // Altura fixa pra todo card ficar com sensação de tamanho único
   heroImage: {
     width: "100%",
-    aspectRatio: 4 / 3,
-    borderRadius: 16,
+    height: 120,
+    borderRadius: 14,
+  },
+  heroImageFallback: {
+    width: "100%",
+    height: 120,
+    borderRadius: 14,
+    backgroundColor: "#E5E7EB",
   },
 
   title: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#111827",
     fontFamily: "Nunito-SemiBold",
+    marginBottom: 4,
+  },
+
+  company: {
+    fontSize: 13,
+    color: "#6B7280",
+    fontFamily: "Nunito-Regular",
     marginBottom: 6,
   },
 
   subtitle: {
-    fontSize: 14,
+    fontSize: 13,
+    lineHeight: 18,
     color: "#4B5563",
     fontFamily: "Nunito-Regular",
   },
 
   ctaRow: {
-    marginTop: 20,
+    marginTop: 16,
     alignItems: "flex-start",
   },
 
@@ -84,34 +96,30 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 28,
-    height: 46,
+    paddingHorizontal: 22,
+    height: 42,
     borderRadius: 999,
   },
 
   ctaText: {
     fontSize: 14,
     fontFamily: "Nunito-SemiBold",
-    textTransform: "uppercase",
-  },
-
-  ctaArrow: {
-    marginLeft: 12,
-    fontSize: 18,
-    fontWeight: "700",
+    textTransform: "none",
+    color: "#FFFFFF",
   },
 
   dotsRow: {
-    marginTop: 14,
+    marginTop: 10,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    columnGap: 10,
+    columnGap: 8,
   },
 
   dotBase: {
-    height: 6,
+    width: 8,
+    height: 8,
     borderRadius: 999,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: "#D1D5DB",
   },
 });

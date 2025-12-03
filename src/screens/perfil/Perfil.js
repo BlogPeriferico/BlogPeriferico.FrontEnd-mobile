@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -29,6 +30,12 @@ import { getTodasVendas } from "../../services/vendas";
 import { getTodasVagas } from "../../services/vagas";
 
 import AvatarPlaceholder from "../../assets/svgs/avatar-placeholder.svg";
+
+/* ===== CONFIG GRID (2 colunas para doações / vendas / vagas) ===== */
+const SCREEN_W = Dimensions.get("window").width;
+const H_PADDING = 12; // mesmo paddingHorizontal do scrollContent
+const GUTTER = 12;
+const CARD_W = (SCREEN_W - H_PADDING * 2 - GUTTER) / 2;
 
 /* Helpers pra ID do dono */
 function normId(x) {
@@ -279,23 +286,19 @@ export default function Perfil({ navigation }) {
     [user?.bio]
   );
 
-  const debugCounts = useMemo(() => {
-    return (
-      `uid=${userId} | ` +
-      `N=${minhasNoticias.length}${isFallbackNoticias ? " (all)" : ""} ` +
-      `D=${minhasDoacoes.length}${isFallbackDoacoes ? " (all)" : ""} ` +
-      `V=${minhasVendas.length} ` +
-      `G=${minhasVagas.length}`
-    );
-  }, [
-    userId,
-    minhasNoticias.length,
-    minhasDoacoes.length,
-    minhasVendas.length,
-    minhasVagas.length,
-    isFallbackNoticias,
-    isFallbackDoacoes,
-  ]);
+  const totalPublicacoes = useMemo(
+    () =>
+      minhasNoticias.length +
+      minhasDoacoes.length +
+      minhasVendas.length +
+      minhasVagas.length,
+    [
+      minhasNoticias.length,
+      minhasDoacoes.length,
+      minhasVendas.length,
+      minhasVagas.length,
+    ]
+  );
 
   return (
     <View style={s.container}>
@@ -312,68 +315,72 @@ export default function Perfil({ navigation }) {
           />
         }
       >
-        {/* DEBUG STATUS NA TELA */}
-        <Text
-          style={{
-            fontSize: 10,
-            color: "#9CA3AF",
-            textAlign: "center",
-            marginBottom: 6,
-          }}
-        >
-          {debugCounts}
-        </Text>
+        {/* HEADER ESTILO INSTAGRAM */}
+        <View style={s.headerCard}>
+          <View style={s.topRow}>
+            <View style={s.avatarWrap}>
+              {user?.fotoPerfil ? (
+                <Image source={{ uri: user.fotoPerfil }} style={s.avatar} />
+              ) : (
+                <View style={s.avatar}>
+                  <AvatarPlaceholder
+                    width="100%"
+                    height="100%"
+                    preserveAspectRatio="xMidYMid slice"
+                  />
+                </View>
+              )}
+            </View>
 
-        {/* Banner / cabeçalho */}
-        <View style={[s.headerCard, { borderColor: accent }]}>
-          <View style={[s.avatarWrap, { borderColor: accent }]}>
-            {user?.fotoPerfil ? (
-              <Image source={{ uri: user.fotoPerfil }} style={s.avatar} />
-            ) : (
-              <View style={s.avatar}>
-                <AvatarPlaceholder
-                  width="100%"
-                  height="100%"
-                  preserveAspectRatio="xMidYMid slice"
-                />
+            {/* Métricas por tipo de publicação */}
+            <View style={s.statsRow}>
+              <View style={s.statItem}>
+                <Text style={s.statNumber}>{minhasNoticias.length}</Text>
+                <Text style={s.statLabel}>Notícias</Text>
               </View>
-            )}
+              <View style={s.statItem}>
+                <Text style={s.statNumber}>{minhasDoacoes.length}</Text>
+                <Text style={s.statLabel}>Doações</Text>
+              </View>
+              <View style={s.statItem}>
+                <Text style={s.statNumber}>{minhasVendas.length}</Text>
+                <Text style={s.statLabel}>Vendas</Text>
+              </View>
+              <View style={s.statItem}>
+                <Text style={s.statNumber}>{minhasVagas.length}</Text>
+                <Text style={s.statLabel}>Vagas</Text>
+              </View>
+            </View>
           </View>
 
-          <View style={s.headerInfo}>
-            <Text style={[s.userName, { color: accent }]} numberOfLines={1}>
-              {nomeUsuario}
-            </Text>
-            <Text style={s.userBio} numberOfLines={2}>
-              {bioUsuario}
-            </Text>
+          <View style={s.nameBioBlock}>
+            <Text style={s.userName}>{nomeUsuario}</Text>
+            {!!bioUsuario && <Text style={s.userBio}>{bioUsuario}</Text>}
           </View>
 
-          <TouchableOpacity
-            onPress={() => navigation.navigate("EditarPerfil")}
-            hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
-            style={[s.editBtn, { borderColor: accent }]}
-          >
-            <Ionicons name="create-outline" size={16} color={accent} />
-          </TouchableOpacity>
+          <View style={s.actionsRow}>
+            <TouchableOpacity
+              style={s.editProfileBtn}
+              onPress={() => navigation.navigate("EditarPerfil")}
+            >
+              <Text style={s.editProfileText}>Editar perfil</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Abas */}
+        {/* Abas estilo Insta (só ícones) */}
         <View style={s.tabsRow}>
           <TouchableOpacity
             onPress={() => setTab("noticias")}
             style={[
               s.tabBtn,
-              tab === "noticias" && {
-                borderBottomColor: accent,
-                borderBottomWidth: 2,
-              },
+              tab === "noticias" && [s.tabBtnActive, { borderBottomColor: accent }],
             ]}
           >
             <Ionicons
-              name="newspaper-outline"
-              size={18}
-              color={tab === "noticias" ? accent : "#94A3B8"}
+              name="grid-outline"
+              size={22}
+              color={tab === "noticias" ? accent : "#6B7280"}
             />
           </TouchableOpacity>
 
@@ -381,16 +388,13 @@ export default function Perfil({ navigation }) {
             onPress={() => setTab("doacoes")}
             style={[
               s.tabBtn,
-              tab === "doacoes" && {
-                borderBottomColor: accent,
-                borderBottomWidth: 2,
-              },
+              tab === "doacoes" && [s.tabBtnActive, { borderBottomColor: accent }],
             ]}
           >
             <Ionicons
-              name="hand-left-outline"
-              size={18}
-              color={tab === "doacoes" ? accent : "#94A3B8"}
+              name="heart-outline"
+              size={22}
+              color={tab === "doacoes" ? accent : "#6B7280"}
             />
           </TouchableOpacity>
 
@@ -398,16 +402,13 @@ export default function Perfil({ navigation }) {
             onPress={() => setTab("vendas")}
             style={[
               s.tabBtn,
-              tab === "vendas" && {
-                borderBottomColor: accent,
-                borderBottomWidth: 2,
-              },
+              tab === "vendas" && [s.tabBtnActive, { borderBottomColor: accent }],
             ]}
           >
             <Ionicons
-              name="storefront-outline"
-              size={18}
-              color={tab === "vendas" ? accent : "#94A3B8"}
+              name="pricetag-outline"
+              size={22}
+              color={tab === "vendas" ? accent : "#6B7280"}
             />
           </TouchableOpacity>
 
@@ -415,42 +416,38 @@ export default function Perfil({ navigation }) {
             onPress={() => setTab("vagas")}
             style={[
               s.tabBtn,
-              tab === "vagas" && {
-                borderBottomColor: accent,
-                borderBottomWidth: 2,
-              },
+              tab === "vagas" && [s.tabBtnActive, { borderBottomColor: accent }],
             ]}
           >
             <Ionicons
-              name="megaphone-outline"
-              size={18}
-              color={tab === "vagas" ? accent : "#94A3B8"}
+              name="briefcase-outline"
+              size={22}
+              color={tab === "vagas" ? accent : "#6B7280"}
             />
           </TouchableOpacity>
         </View>
 
-        {/* Listagens */}
+        {/* Conteúdo das abas */}
         {loading ? (
-          <View style={{ paddingVertical: 24, alignItems: "center" }}>
+          <View style={s.loadingWrap}>
             <ActivityIndicator size="large" color={accent} />
           </View>
         ) : (
           <View style={s.cardsBlock}>
-            {/* NOTÍCIAS */}
+            {/* NOTÍCIAS -> LISTA NORMAL, SEM GRID */}
             {tab === "noticias" &&
               (minhasNoticias.length ? (
                 minhasNoticias.map((n) => (
-                  <View key={n.id} style={s.cardSpacer}>
-                    <NewsCardItem
-                      noticia={n}
-                      onPress={() =>
-                        navigation.navigate("DetalheNoticia", {
-                          id: n.id,
-                          noticia: n,
-                        })
-                      }
-                    />
-                  </View>
+                  <NewsCardItem
+                    key={n.id}
+                    noticia={n}
+                    onPress={() =>
+                      navigation.navigate("DetalheNoticia", {
+                        id: n.id,
+                        noticia: n,
+                      })
+                    }
+                  />
                 ))
               ) : (
                 !isFallbackNoticias && (
@@ -460,22 +457,33 @@ export default function Perfil({ navigation }) {
                 )
               ))}
 
-            {/* DOAÇÕES */}
+            {/* DOAÇÕES -> GRID 2 COLUNAS */}
             {tab === "doacoes" &&
               (minhasDoacoes.length ? (
-                minhasDoacoes.map((d) => (
-                  <DoacaoCard
-                    key={d.id}
-                    item={d}
-                    style={s.cardSpacer}
-                    onPress={(selected) =>
-                      navigation.navigate("DetalheDoacao", {
-                        id: (selected && selected.id) || d.id,
-                        doacao: selected || d,
-                      })
-                    }
-                  />
-                ))
+                <View style={s.grid}>
+                  {minhasDoacoes.map((d, index) => {
+                    const isLeftCol = index % 2 === 0;
+                    return (
+                      <DoacaoCard
+                        key={d.id}
+                        item={d}
+                        style={[
+                          s.cardGridItem,
+                          {
+                            width: CARD_W,
+                            marginRight: isLeftCol ? GUTTER : 0,
+                          },
+                        ]}
+                        onPress={(selected) =>
+                          navigation.navigate("DetalheDoacao", {
+                            id: (selected && selected.id) || d.id,
+                            doacao: selected || d,
+                          })
+                        }
+                      />
+                    );
+                  })}
+                </View>
               ) : (
                 !isFallbackDoacoes && (
                   <Text style={s.emptyText}>
@@ -484,44 +492,66 @@ export default function Perfil({ navigation }) {
                 )
               ))}
 
-            {/* VENDAS */}
+            {/* VENDAS -> GRID 2 COLUNAS */}
             {tab === "vendas" &&
               (minhasVendas.length ? (
-                minhasVendas.map((v) => (
-                  <VendaCard
-                    key={v.id}
-                    item={v}
-                    style={s.cardSpacer}
-                    onPress={() =>
-                      navigation.navigate("DetalheVenda", {
-                        id: v.id,
-                        venda: v,
-                      })
-                    }
-                  />
-                ))
+                <View style={s.grid}>
+                  {minhasVendas.map((v, index) => {
+                    const isLeftCol = index % 2 === 0;
+                    return (
+                      <VendaCard
+                        key={v.id}
+                        item={v}
+                        style={[
+                          s.cardGridItem,
+                          {
+                            width: CARD_W,
+                            marginRight: isLeftCol ? GUTTER : 0,
+                          },
+                        ]}
+                        onPress={() =>
+                          navigation.navigate("DetalheVenda", {
+                            id: v.id,
+                            venda: v,
+                          })
+                        }
+                      />
+                    );
+                  })}
+                </View>
               ) : (
                 <Text style={s.emptyText}>
                   Você ainda não publicou vendas.
                 </Text>
               ))}
 
-            {/* VAGAS */}
+            {/* VAGAS -> GRID 2 COLUNAS */}
             {tab === "vagas" &&
               (minhasVagas.length ? (
-                minhasVagas.map((vaga) => (
-                  <VagaCard
-                    key={vaga.id}
-                    item={vaga}
-                    style={s.cardSpacer}
-                    onPress={() =>
-                      navigation.navigate("DetalheVaga", {
-                        id: vaga.id,
-                        vaga,
-                      })
-                    }
-                  />
-                ))
+                <View style={s.grid}>
+                  {minhasVagas.map((vaga, index) => {
+                    const isLeftCol = index % 2 === 0;
+                    return (
+                      <VagaCard
+                        key={vaga.id}
+                        item={vaga}
+                        style={[
+                          s.cardGridItem,
+                          {
+                            width: CARD_W,
+                            marginRight: isLeftCol ? GUTTER : 0,
+                          },
+                        ]}
+                        onPress={() =>
+                          navigation.navigate("DetalheVaga", {
+                            id: vaga.id,
+                            vaga,
+                          })
+                        }
+                      />
+                    );
+                  })}
+                </View>
               ) : (
                 <Text style={s.emptyText}>
                   Você ainda não publicou vagas.

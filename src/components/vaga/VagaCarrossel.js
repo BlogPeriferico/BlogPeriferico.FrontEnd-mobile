@@ -1,4 +1,3 @@
-// src/components/vaga/VagaCarrossel.js
 import React, { useEffect, useState, useRef } from "react";
 import {
   View,
@@ -90,7 +89,8 @@ export default function VagaCarrossel({ navigation, containerStyle }) {
 
   if (!itens.length) return null;
 
-  const CARD_WIDTH = SCREEN_W * 0.92;
+  // largura fixa do card pra todas as telas (tamanho único)
+  const CARD_WIDTH = SCREEN_W * 0.9;
 
   return (
     <View style={[s.container, containerStyle]}>
@@ -115,15 +115,24 @@ export default function VagaCarrossel({ navigation, containerStyle }) {
               onPress={() => abrirDetalhe(item)}
             >
               <View style={s.row}>
+                {/* LADO ESQUERDO – TEXTO */}
                 <View style={s.left}>
                   <Text style={s.title} numberOfLines={2}>
                     {item.titulo || "Vaga"}
                   </Text>
-                  <Text style={s.subtitle} numberOfLines={3}>
+
+                  {!!item.empresa && (
+                    <Text style={s.company} numberOfLines={1}>
+                      {item.empresa}
+                    </Text>
+                  )}
+
+                  <Text style={s.subtitle} numberOfLines={3} ellipsizeMode="tail">
                     {item.descricao || "Sem descrição disponível."}
                   </Text>
                 </View>
 
+                {/* LADO DIREITO – IMAGEM FIXA */}
                 <View style={s.rightImageWrap}>
                   {item.imagem ? (
                     <Image
@@ -132,16 +141,12 @@ export default function VagaCarrossel({ navigation, containerStyle }) {
                       resizeMode="cover"
                     />
                   ) : (
-                    <View
-                      style={[
-                        s.heroImage,
-                        { backgroundColor: "#E5E7EB" },
-                      ]}
-                    />
+                    <View style={s.heroImageFallback} />
                   )}
                 </View>
               </View>
 
+              {/* CTA */}
               <View style={s.ctaRow}>
                 <TouchableOpacity
                   onPress={() => contato(item)}
@@ -157,15 +162,7 @@ export default function VagaCarrossel({ navigation, containerStyle }) {
                       { color: colors.onPrimary || "#FFF" },
                     ]}
                   >
-                    CANDIDATAR-SE
-                  </Text>
-                  <Text
-                    style={[
-                      s.ctaArrow,
-                      { color: colors.onPrimary || "#FFF" },
-                    ]}
-                  >
-                    ➜
+                    Candidatar-se
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -174,6 +171,7 @@ export default function VagaCarrossel({ navigation, containerStyle }) {
         )}
       />
 
+      {/* DOTS BEM CLEAN */}
       <View style={s.dotsRow}>
         {itens.map((_, i) => {
           const inputRange = [
@@ -182,15 +180,15 @@ export default function VagaCarrossel({ navigation, containerStyle }) {
             (i + 1) * SCREEN_W,
           ];
 
-          const dotWidth = scrollX.interpolate({
+          const opacity = scrollX.interpolate({
             inputRange,
-            outputRange: [24, 40, 24],
+            outputRange: [0.4, 1, 0.4],
             extrapolate: "clamp",
           });
 
-          const opacity = scrollX.interpolate({
+          const scale = scrollX.interpolate({
             inputRange,
-            outputRange: [0.5, 1, 0.5],
+            outputRange: [1, 1.3, 1],
             extrapolate: "clamp",
           });
 
@@ -200,8 +198,8 @@ export default function VagaCarrossel({ navigation, containerStyle }) {
               style={[
                 s.dotBase,
                 {
-                  width: dotWidth,
                   opacity,
+                  transform: [{ scale }],
                 },
               ]}
             />

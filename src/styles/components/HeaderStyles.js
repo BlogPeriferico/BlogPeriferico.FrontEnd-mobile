@@ -17,7 +17,7 @@ export const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: "#fff",
     zIndex: 10,
-    paddingBottom: 4,
+    paddingBottom: 2,
   },
 
   // ===== Header (topo) =====
@@ -26,45 +26,50 @@ export const styles = StyleSheet.create({
     height: 70,
     backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
-    paddingBottom: 6,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
 
+    // ❗ sem borda marcada, sombra bem leve pra parecer contínuo
+    borderBottomWidth: 0,
+    borderBottomColor: "#E5E7EB",
+
     shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 6,
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 0,
   },
 
   // Barrinha colorida embaixo do header
   headerAccentWrapper: {
     alignItems: "center",
     justifyContent: "center",
-    marginTop: -4,
-    marginBottom: 8,
+    marginTop: -2,
+    marginBottom: 6,
   },
   headerAccentBar: {
-    width: "60%",
-    height: 3,
+    width: "52%",
+    height: 2,
     borderRadius: 999,
     backgroundColor: "#111827",
   },
 
   // === Hamburguer ===
   hamburguer: {
-    width: 32,
-    height: 28,
+    width: 36,
+    height: 36,
+    borderRadius: 999,
+    backgroundColor: "#F3F4F6",
     justifyContent: "center",
     alignItems: "center",
   },
   hBar: {
     position: "absolute",
-    width: 22,
-    height: 2.4,
+    width: 18,
+    height: 2,
     borderRadius: 999,
-    backgroundColor: "#020617",
+    backgroundColor: "#0F172A",
   },
 
   // === Centro (título/busca) ===
@@ -75,17 +80,18 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
   titulo: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#001C30",
-    letterSpacing: 0.3,
+    fontSize: 20,
+    fontWeight: "700",
+    letterSpacing: 0.4,
+    color: "#0F172A",
+    fontFamily: "Poppins-SemiBold",
   },
 
   searchBox: {
     position: "absolute",
     left: 0,
     right: 0,
-    height: 42,
+    height: 40,
     borderRadius: 999,
     backgroundColor: "#F3F4F6",
     overflow: "hidden",
@@ -99,7 +105,7 @@ export const styles = StyleSheet.create({
   inputBusca: {
     flex: 1,
     height: "100%",
-    fontSize: 15,
+    fontSize: 14,
     color: "#0F172A",
     paddingVertical: 0,
     includeFontPadding: false,
@@ -114,10 +120,19 @@ export const styles = StyleSheet.create({
     paddingLeft: 6,
   },
 
+  // Ícone de busca à direita (pill)
+  searchIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 999,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   // ===== Drawer / Overlay =====
   fullscreenModal: {
     position: "absolute",
-    // respeita a área da status bar
     top: Platform.OS === "android" ? (StatusBar.currentHeight || 0) : 0,
     left: 0,
     width: "100%",
@@ -156,10 +171,9 @@ export const styles = StyleSheet.create({
 
   botaoFechar: {
     alignSelf: "flex-end",
-    padding: 8,
+    padding: 4,
   },
 
-  // Header do drawer (avatar + textos)
   drawerHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -200,7 +214,6 @@ export const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Itens do drawer
   drawerItemRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -220,7 +233,6 @@ export const styles = StyleSheet.create({
     color: "#0F172A",
   },
 
-  // Título da seção "Localização"
   drawerSectionTitle: {
     fontSize: 12,
     color: "#6B7280",
